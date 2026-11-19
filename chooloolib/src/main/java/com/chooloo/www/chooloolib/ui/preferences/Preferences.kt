@@ -11,7 +11,9 @@ import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material.icons.rounded.Vibration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,6 +47,18 @@ private enum class PreferenceItem(
         PreferenceSection.APPEARANCE,
         Icons.Rounded.Palette,
         R.string.pref_title_theme_color,
+        isDialerOnly = true,
+    ),
+    LEFT_HANDED(
+        PreferenceSection.APPEARANCE,
+        Icons.Rounded.SwapHoriz,
+        R.string.pref_left_handed,
+        isDialerOnly = true,
+    ),
+    PHONE_SETUP(
+        PreferenceSection.DIALER,
+        Icons.Rounded.Phone,
+        R.string.pref_phone_setup,
         isDialerOnly = true,
     ),
     DEFAULT_PAGE(
@@ -100,6 +114,9 @@ fun Preferences(
     showDialerPreferences: Boolean,
     onDefaultPage: (Page) -> Unit,
     onThemeMode: (ThemeMode) -> Unit,
+    leftHanded: Boolean,
+    onLeftHanded: (Boolean) -> Unit,
+    onPhoneSetup: (() -> Unit)?,
     accentRgb: Int,
     onAccentRgb: (Int) -> Unit,
     onIsGroupRecentsEnabled: (Boolean) -> Unit,
@@ -117,7 +134,10 @@ fun Preferences(
         ThemeColorDialog(accentRgb, onAccentRgb) { isThemeOpen = false }
     }
 
-    val preferences = PreferenceItem.entries.filter { showDialerPreferences || !it.isDialerOnly }
+    val preferences = PreferenceItem.entries.filter {
+        (showDialerPreferences || !it.isDialerOnly) &&
+            (it != PreferenceItem.PHONE_SETUP || onPhoneSetup != null)
+    }
     val sectionTitles = PreferenceSection.entries.associateWith { stringResource(it.titleRes) }
 
     ItemList(
@@ -144,6 +164,17 @@ fun Preferences(
                     title,
                     accentHex(accentRgb),
                 ) { isThemeOpen = true }
+
+                PreferenceItem.LEFT_HANDED -> SwitchPreferenceListItem(
+                    icon,
+                    title,
+                    leftHanded,
+                    onLeftHanded,
+                )
+
+                PreferenceItem.PHONE_SETUP -> onPhoneSetup?.let {
+                    ActionPreferenceListItem(icon, title, null, it)
+                }
 
                 PreferenceItem.DEFAULT_PAGE -> ChoicePreferenceListItem(
                     icon = icon,

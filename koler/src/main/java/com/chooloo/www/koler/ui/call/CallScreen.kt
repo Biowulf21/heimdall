@@ -1,6 +1,5 @@
 package com.chooloo.www.koler.ui.call
 
-import android.telecom.InCallService.VideoCall
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,16 +15,13 @@ import com.chooloo.www.chooloolib.ui.components.list.ItemList
 import com.chooloo.www.chooloolib.ui.components.list.ListItem
 import com.chooloo.www.chooloolib.ui.components.list.RadioListItem
 import com.chooloo.www.chooloolib.ui.dialpad.DialpadScreen
-import com.chooloo.www.koler.domain.enum.CallState
 import com.chooloo.www.koler.domain.enum.CallsState
 import com.chooloo.www.koler.ui.call.CallViewModel.Sheet
 import com.chooloo.www.koler.ui.common.CallLabels
+import com.chooloo.www.koler.ui.main.rememberHeimdallCallGate
 
 @Composable
-fun CallScreen(
-    callViewModel: CallViewModel = hiltViewModel(),
-    videoCalls: Map<String, VideoCall> = emptyMap(),
-) {
+fun CallScreen(callViewModel: CallViewModel = hiltViewModel(), leftHanded: Boolean = false) {
     val context = LocalContext.current
     val uiState by callViewModel.uiState.collectAsStateWithLifecycle()
     val call = uiState.call
@@ -36,7 +32,7 @@ fun CallScreen(
         skipPartiallyExpanded = true,
         onDismiss = callViewModel::onSheetDismiss,
     ) {
-        DialpadScreen()
+        DialpadScreen(leftHanded = leftHanded, callGate = rememberHeimdallCallGate())
     }
 
     BottomSheet(
@@ -110,8 +106,5 @@ fun CallScreen(
         onAccept = callViewModel::onAccept,
         onHangup = callViewModel::onHangup,
         onManage = callViewModel::onManage,
-        video = call?.takeIf { it.state == CallState.ACTIVE }?.id?.let(videoCalls::get)?.let {
-            { CallVideoPanel(it) }
-        },
     )
 }

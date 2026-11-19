@@ -10,6 +10,8 @@ interface PreferenceRepository {
 
     suspend fun setDefaultPage(page: Page)
     suspend fun setThemeMode(themeMode: ThemeMode)
+    suspend fun setLeftHanded(enabled: Boolean)
+    suspend fun completePhoneSetup()
     suspend fun setAccentRgb(rgb: Int)
     suspend fun setIsGroupRecentsEnabled(isEnabled: Boolean)
     suspend fun setIsDialpadTonesEnabled(isEnabled: Boolean)

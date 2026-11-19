@@ -26,6 +26,8 @@ class PreferenceRepositoryImpl @Inject constructor(private val dataStore: DataSt
                 defaultPage = enumOf(preferences, DEFAULT_PAGE, PAGE_KEYS) ?: defaults.defaultPage,
                 themeMode =
                     enumOf(preferences, THEME_MODE, THEME_MODE_KEYS) ?: defaults.themeMode,
+                leftHanded = preferences[LEFT_HANDED] ?: defaults.leftHanded,
+                phoneSetupCompleted = preferences[SETUP_COMPLETED] ?: defaults.phoneSetupCompleted,
                 accentRgb = preferences[ACCENT_RGB] ?: defaults.accentRgb,
                 isGroupRecentsEnabled =
                     preferences[GROUP_RECENTS] ?: defaults.isGroupRecentsEnabled,
@@ -41,6 +43,10 @@ class PreferenceRepositoryImpl @Inject constructor(private val dataStore: DataSt
 
     override suspend fun setThemeMode(themeMode: ThemeMode) =
         set(THEME_MODE, THEME_MODE_KEYS.getValue(themeMode))
+
+    override suspend fun setLeftHanded(enabled: Boolean) = set(LEFT_HANDED, enabled)
+
+    override suspend fun completePhoneSetup() = set(SETUP_COMPLETED, true)
 
     override suspend fun setAccentRgb(rgb: Int) = set(ACCENT_RGB, rgb)
 
@@ -64,6 +70,8 @@ class PreferenceRepositoryImpl @Inject constructor(private val dataStore: DataSt
     ): T? = preferences[key]?.let { stored -> keys.entries.firstOrNull { it.value == stored }?.key }
 
     private companion object {
+        val LEFT_HANDED = booleanPreferencesKey("left_handed")
+        val SETUP_COMPLETED = booleanPreferencesKey("phone_setup_completed")
         val ACCENT_RGB = intPreferencesKey("accent_rgb")
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val DEFAULT_PAGE = stringPreferencesKey("default_page")

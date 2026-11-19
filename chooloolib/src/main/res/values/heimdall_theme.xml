@@ -5,4 +5,8 @@
     <string name="theme_hex_error">Enter a color as #RRGGBB.</string>
     <string name="theme_apply">Apply</string>
     <string name="error_contact_update_failed">Couldn\'t update the contact</string>
+    <string name="pref_left_handed">Left-handed mode</string>
+    <string name="pref_phone_setup">Phone setup</string>
+    <string name="contact_alphabet_index">Contacts alphabet index</string>
+    <string name="contact_jump_section">Jump to %1$s</string>
 </resources>

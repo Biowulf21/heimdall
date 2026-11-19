@@ -3,7 +3,9 @@ package com.chooloo.www.chooloolib.ui.components.list
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -26,6 +28,7 @@ fun <ItemType> ItemList(
     emptyIcon: ImageVector? = null,
     key: ((ItemType) -> String)? = null,
     header: ((ItemType) -> String)? = null,
+    listState: LazyListState = rememberLazyListState(),
 ) {
     val headersByIndex = remember(items, header) { headersByIndex(items, header) }
 
@@ -46,7 +49,11 @@ fun <ItemType> ItemList(
             image = emptyIcon?.let { icon -> { Icon(icon, contentDescription = null) } },
         )
 
-        else -> LazyColumn(modifier = modifier, contentPadding = contentPadding) {
+        else -> LazyColumn(
+            modifier = modifier,
+            contentPadding = contentPadding,
+            state = listState,
+        ) {
             itemsIndexed(
                 items = items,
                 key = key?.let {

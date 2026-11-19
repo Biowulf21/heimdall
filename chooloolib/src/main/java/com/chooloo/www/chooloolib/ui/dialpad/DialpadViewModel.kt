@@ -45,6 +45,8 @@ class DialpadViewModel @Inject constructor(
         }
     }
 
+    fun callNumber(number: String) = launchCatching { telecomRepository.callNumber(number) }
+
     fun onDeleteClick() {
         _uiState.update { it.copy(value = it.value.dropLast(1)) }
     }

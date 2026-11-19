@@ -40,7 +40,6 @@ import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.StarBorder
-import androidx.compose.material.icons.rounded.Videocam
 import androidx.compose.material.icons.rounded.Voicemail
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -85,11 +84,11 @@ import com.chooloo.www.chooloolib.ui.components.MessageToast
 import com.chooloo.www.chooloolib.ui.components.list.ListItem
 import com.chooloo.www.chooloolib.ui.recents.RecentTypeIcon
 import com.chooloo.www.koler.R
+import com.chooloo.www.koler.ui.main.rememberHeimdallCallGate
 
 private enum class ContactAction(@StringRes val title: Int, val icon: ImageVector) {
     CALL(SharedR.string.action_call, Icons.Rounded.Call),
     MESSAGE(SharedR.string.action_message, Icons.AutoMirrored.Rounded.Message),
-    VIDEO(R.string.contact_video, Icons.Rounded.Videocam),
     EMAIL(R.string.contact_email, Icons.Rounded.Email),
 }
 
@@ -106,6 +105,8 @@ internal fun ContactProfileScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val external = rememberExternalActions()
+    val callGate = rememberHeimdallCallGate()
+    val callNumber: (String) -> Unit = { number -> callGate(number) { viewModel.onCall(number) } }
     val actions = remember(context) { ContactProfileActions(context) }
     val list = rememberLazyListState()
     val collapsed by remember { derivedStateOf { list.firstVisibleItemIndex > 0 } }
@@ -148,12 +149,10 @@ internal fun ContactProfileScreen(
     fun perform(action: ContactAction, value: String) {
         when (action) {
             ContactAction.CALL -> {
-                viewModel.onCall(value)
+                callNumber(value)
             }
 
             ContactAction.MESSAGE -> external.openSms(value)
-
-            ContactAction.VIDEO -> actions.videoCall(value)
 
             ContactAction.EMAIL -> external.sendEmail(value)
         }
@@ -244,10 +243,11 @@ internal fun ContactProfileScreen(
                         }
                     }
                     stickyHeader {
-                        val available = ContactAction.entries.filter {
-                            it != ContactAction.VIDEO || actions.canVideoCall
-                        }
-                        ProfileQuickActions(available, { valuesFor(it).isNotEmpty() }, ::select)
+                        ProfileQuickActions(
+                            ContactAction.entries,
+                            { valuesFor(it).isNotEmpty() },
+                            ::select,
+                        )
                     }
                     if (phoneNumbers.isNotEmpty()) {
                         item { SectionHeading(SharedR.string.phones) }
@@ -263,7 +263,7 @@ internal fun ContactProfileScreen(
                                     ).toString()
                                 },
                                 icon = Icons.Rounded.Call,
-                                onClick = { viewModel.onCall(number) },
+                                onClick = { callNumber(number) },
                                 end = {
                                     IconButton(onClick = { external.openSms(number) }) {
                                         Icon(
@@ -424,7 +424,7 @@ private fun ProfileQuickActions(
         val fitting = (actions.size downTo 1).first { columns ->
             columns == 1 || (maxWidth - gap * (columns - 1)) / columns >= 76.dp
         }
-        val columns = if (actions.size == 4 && fitting == 3) 2 else fitting
+        val columns = fitting
         val buttonWidth = ((maxWidth - gap * (columns - 1)) / columns).coerceAtMost(128.dp)
         FlowRow(
             modifier = Modifier.fillMaxWidth(),

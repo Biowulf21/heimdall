@@ -18,6 +18,7 @@ import com.chooloo.www.chooloolib.data.source.CursorRow
 import com.chooloo.www.chooloolib.di.IoDispatcher
 import com.chooloo.www.chooloolib.domain.model.Contact
 import com.chooloo.www.chooloolib.domain.model.ContactDetails
+import com.chooloo.www.chooloolib.domain.model.DialpadContact
 import com.chooloo.www.chooloolib.domain.model.Phone as PhoneModel
 import com.chooloo.www.chooloolib.domain.repository.ContactRepository
 import javax.inject.Inject
@@ -53,6 +54,32 @@ class ContactRepositoryImpl @Inject constructor(
             contacts.map { it.copy(number = numbers[it.id]) }
         }
         .flowOn(ioDispatcher)
+
+    override fun dialpadContacts(): Flow<List<DialpadContact>> = contentSource.observeAll(
+        ContentQuery(
+            uri = Phone.CONTENT_URI,
+            projection = arrayOf(
+                Phone.CONTACT_ID,
+                Phone.DISPLAY_NAME_PRIMARY,
+                Phone.PHOTO_THUMBNAIL_URI,
+                Phone.NUMBER,
+            ),
+            sortOrder = "${Phone.SORT_KEY_PRIMARY} ASC, $PRIMARY_FIRST, ${Phone._ID} ASC",
+        ),
+    ) { row ->
+        Contact(
+            id = row.long(Phone.CONTACT_ID),
+            name = row.string(Phone.DISPLAY_NAME_PRIMARY),
+            photoUri = row.string(Phone.PHOTO_THUMBNAIL_URI),
+        ) to row.string(Phone.NUMBER).orEmpty()
+    }.map { rows ->
+        rows.groupBy { it.first.id }.values.mapNotNull { contactRows ->
+            val numbers = contactRows.map { it.second }.filter(String::isNotBlank).distinct()
+            numbers.takeIf {
+                it.isNotEmpty()
+            }?.let { DialpadContact(contactRows.first().first, it) }
+        }
+    }.flowOn(ioDispatcher)
 
     override fun contact(contactId: Long): Flow<Contact?> = contentSource.observeAll(
         ContentQuery(

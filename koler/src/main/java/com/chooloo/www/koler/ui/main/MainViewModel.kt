@@ -64,6 +64,11 @@ class MainViewModel @Inject constructor(
     private val transientState = MutableStateFlow(TransientState())
 
     val search = HomeSearch(savedStateHandle)
+    val phoneSettings = preferenceRepository.settings
+
+    fun completePhoneSetup() {
+        viewModelScope.launch { preferenceRepository.completePhoneSetup() }
+    }
 
     val uiState: StateFlow<UiState> = combine(
         tab,

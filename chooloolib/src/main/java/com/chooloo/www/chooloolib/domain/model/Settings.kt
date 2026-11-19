@@ -9,5 +9,7 @@ data class Settings(
     val isGroupRecentsEnabled: Boolean = false,
     val isDialpadTonesEnabled: Boolean = true,
     val isDialpadVibrateEnabled: Boolean = true,
+    val leftHanded: Boolean = false,
+    val phoneSetupCompleted: Boolean = false,
     val accentRgb: Int = 0x42A5F5,
 )

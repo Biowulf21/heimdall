@@ -5,6 +5,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -33,7 +37,18 @@ fun MainScreen(viewModel: MainViewModel) {
     val ongoingCall by viewModel.ongoingCall.collectAsStateWithLifecycle()
     val tab = uiState.tab ?: return
 
-    DefaultDialerRequest()
+    val phoneSettings by viewModel.phoneSettings.collectAsStateWithLifecycle(initialValue = null)
+    val leftHanded = phoneSettings?.leftHanded == true
+    val callGate = rememberHeimdallCallGate()
+    var setupOpen by rememberSaveable { mutableStateOf(false) }
+    var setupDismissed by rememberSaveable { mutableStateOf(false) }
+    if (setupOpen || (phoneSettings?.phoneSetupCompleted == false && !setupDismissed)) {
+        PhoneSetup(skipWhenReady = !setupOpen) {
+            setupOpen = false
+            setupDismissed = true
+            viewModel.completePhoneSetup()
+        }
+    }
 
     DialerHomeScaffold(
         title = stringResource(if (tab == Tab.RECENTS) R.string.recents else R.string.contacts),
@@ -51,7 +66,9 @@ fun MainScreen(viewModel: MainViewModel) {
         bottomBarContent = {
             Reveal(
                 visible = tab == Tab.CONTACTS,
-                modifier = Modifier.align(Alignment.CenterStart),
+                modifier = Modifier.align(
+                    if (leftHanded) AbsoluteAlignment.CenterLeft else AbsoluteAlignment.CenterRight,
+                ),
             ) {
                 FloatingBubble(
                     icon = Icons.Rounded.PersonAdd,
@@ -84,6 +101,7 @@ fun MainScreen(viewModel: MainViewModel) {
             )
 
             Tab.CONTACTS -> ContactsScreen(
+                alphabetIndexOnLeft = leftHanded,
                 filter = uiState.searchText,
                 contentPadding = listPadding,
                 onItemClick = {
@@ -98,7 +116,10 @@ fun MainScreen(viewModel: MainViewModel) {
         skipPartiallyExpanded = true,
         onDismiss = viewModel::onSettingsClose,
     ) {
-        PreferencesScreen(showDialerPreferences = true)
+        PreferencesScreen(showDialerPreferences = true, onPhoneSetup = {
+            viewModel.onSettingsClose()
+            setupOpen = true
+        })
     }
 
     BottomSheet(
@@ -106,12 +127,25 @@ fun MainScreen(viewModel: MainViewModel) {
         skipPartiallyExpanded = true,
         onDismiss = viewModel::onDialpadClose,
     ) {
-        DialpadScreen(initialNumber = uiState.dialNumber)
+        DialpadScreen(
+            initialNumber = uiState.dialNumber,
+            leftHanded = leftHanded,
+            callGate = callGate,
+            suggestions = { digits, onCall ->
+                DialpadMatches(
+                    digits = digits,
+                    onCall = onCall,
+                    onOpenContact = { id ->
+                        context.startActivity(ContactProfileActivity.intent(context, id))
+                    },
+                )
+            },
+        )
     }
 
     BottomSheet(visible = uiState.selectedCaller != null, onDismiss = viewModel::onCallerDismiss) {
         uiState.selectedCaller?.let {
-            CallerScreen(target = it, onDismiss = viewModel::onCallerDismiss)
+            CallerScreen(target = it, onDismiss = viewModel::onCallerDismiss, callGate = callGate)
         }
     }
 }

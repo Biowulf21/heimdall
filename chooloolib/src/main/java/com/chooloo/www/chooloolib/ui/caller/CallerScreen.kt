@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chooloo.www.chooloolib.R
+import com.chooloo.www.chooloolib.ui.common.CallGate
 import com.chooloo.www.chooloolib.ui.common.rememberExternalActions
 import com.chooloo.www.chooloolib.ui.components.ConfirmDialog
 import com.chooloo.www.chooloolib.ui.components.MessageToast
@@ -19,6 +20,7 @@ import com.chooloo.www.chooloolib.ui.components.MessageToast
 fun CallerScreen(
     target: CallerTarget,
     onDismiss: () -> Unit,
+    callGate: CallGate = { _, call -> call() },
     viewModel: CallerViewModel = hiltViewModel<CallerViewModel, CallerViewModel.Factory>(
         key = target.toString(),
         creationCallback = { factory -> factory.create(target) },
@@ -33,7 +35,7 @@ fun CallerScreen(
 
     Caller(
         state = uiState,
-        onCall = viewModel::onCall,
+        onCall = { number -> callGate(number) { viewModel.onCall(number) } },
         onMessage = externalActions::openSms,
         onWhatsapp = externalActions::openWhatsapp,
         onEmail = externalActions::sendEmail,

@@ -4,8 +4,6 @@ import android.os.Build
 import android.telecom.Call as TelecomCall
 import android.telecom.CallAudioState
 import android.telecom.InCallService
-import android.telecom.InCallService.VideoCall
-import android.telecom.VideoProfile
 import android.util.Log
 import com.chooloo.www.koler.data.mapper.CallMapper
 import com.chooloo.www.koler.domain.enum.AudioRoute
@@ -28,7 +26,6 @@ class CallRepositoryImpl @Inject constructor(private val callMapper: CallMapper)
     private val callIds = IdentityHashMap<TelecomCall, String>()
     private val callCallback = object : TelecomCall.Callback() {
         override fun onStateChanged(call: TelecomCall, state: Int) = publishCalls()
-        override fun onVideoCallChanged(call: TelecomCall, videoCall: VideoCall?) = publishCalls()
         override fun onParentChanged(call: TelecomCall, parent: TelecomCall?) = publishCalls()
         override fun onChildrenChanged(call: TelecomCall, children: List<TelecomCall>) =
             publishCalls()
@@ -37,9 +34,6 @@ class CallRepositoryImpl @Inject constructor(private val callMapper: CallMapper)
         override fun onConferenceableCallsChanged(call: TelecomCall, calls: List<TelecomCall>) =
             publishCalls()
     }
-
-    private val _videoCalls = MutableStateFlow<Map<String, VideoCall>>(emptyMap())
-    val videoCalls = _videoCalls.asStateFlow()
 
     private val _calls = MutableStateFlow<List<Call>>(emptyList())
     private val _audio = MutableStateFlow(CallAudio())
@@ -51,7 +45,9 @@ class CallRepositoryImpl @Inject constructor(private val callMapper: CallMapper)
     override val canAddCall: StateFlow<Boolean> = _canAddCall.asStateFlow()
     override val hasPendingOutgoing: StateFlow<Boolean> = _hasPendingOutgoing.asStateFlow()
 
-    override fun answer(callId: String) = withCall(callId) { answer(details.videoState) }
+    override fun answer(callId: String) = withCall(callId) {
+        answer(android.telecom.VideoProfile.STATE_AUDIO_ONLY)
+    }
 
     override fun decline(callId: String) = withCall(callId) {
         when {
@@ -109,7 +105,6 @@ class CallRepositoryImpl @Inject constructor(private val callMapper: CallMapper)
         telecomCalls.clear()
         callIds.clear()
         _calls.value = emptyList()
-        _videoCalls.value = emptyMap()
         _audio.value = CallAudio()
         _canAddCall.value = false
         _hasPendingOutgoing.value = false
@@ -144,15 +139,7 @@ class CallRepositoryImpl @Inject constructor(private val callMapper: CallMapper)
     }
 
     private fun publishCalls() {
-        val mapped = telecomCalls.map { (id, call) -> callMapper.toCall(call, id) }
-        _videoCalls.value = mapped.mapNotNull { call ->
-            telecomCalls[call.id]?.let { telecomCall ->
-                telecomCall.videoCall
-                    ?.takeIf { VideoProfile.isVideo(telecomCall.details.videoState) }
-                    ?.let { call.id to it }
-            }
-        }.toMap()
-        _calls.value = mapped
+        _calls.value = telecomCalls.map { (id, call) -> callMapper.toCall(call, id) }
     }
 
     private inline fun withService(action: InCallService.() -> Unit) {

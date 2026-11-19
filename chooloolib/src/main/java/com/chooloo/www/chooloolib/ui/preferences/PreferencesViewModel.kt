@@ -35,6 +35,8 @@ class PreferencesViewModel @Inject constructor(
 
     fun onDefaultPage(page: Page) = update { setDefaultPage(page) }
 
+    fun onLeftHanded(enabled: Boolean) = update { setLeftHanded(enabled) }
+
     fun onAccentRgb(rgb: Int) = update { setAccentRgb(rgb) }
 
     fun onThemeMode(themeMode: ThemeMode) = update { setThemeMode(themeMode) }

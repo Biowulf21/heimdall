@@ -1,22 +1,15 @@
 package com.chooloo.www.koler.ui.contact
 
-import android.Manifest.permission.CALL_PHONE
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
 import android.media.RingtoneManager
 import android.net.Uri
-import android.os.Bundle
 import android.provider.ContactsContract.Contacts
-import android.telecom.PhoneAccount
-import android.telecom.PhoneAccountHandle
-import android.telecom.TelecomManager
-import android.telecom.VideoProfile
 import android.widget.Toast
 import androidx.annotation.StringRes
 import com.chooloo.www.chooloolib.R as SharedR
@@ -26,13 +19,8 @@ import com.chooloo.www.koler.ui.main.MainActivity
 
 internal class ContactProfileActions(private val context: Context) {
     private val shortcuts get() = context.getSystemService(ShortcutManager::class.java)
-    private val telecom get() = context.getSystemService(TelecomManager::class.java)
 
     val canPinShortcut: Boolean get() = shortcuts?.isRequestPinShortcutSupported == true
-    val canVideoCall: Boolean
-        get() = context.checkSelfPermission(CALL_PHONE) == PERMISSION_GRANTED &&
-            videoAccounts().isNotEmpty()
-
     fun ringtonePicker(current: String?) = Intent(RingtoneManager.ACTION_RINGTONE_PICKER)
         .putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE)
         .putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
@@ -92,25 +80,6 @@ internal class ContactProfileActions(private val context: Context) {
         }
     }
 
-    fun videoCall(number: String) = perform(SharedR.string.error_call_failed) {
-        val manager = telecom
-        val accounts = videoAccounts()
-        if (manager == null || accounts.isEmpty()) {
-            notify(SharedR.string.error_call_failed)
-            return@perform
-        }
-        val preferred = manager.getDefaultOutgoingPhoneAccount(PhoneAccount.SCHEME_TEL)
-            ?.takeIf(accounts::contains) ?: accounts.singleOrNull()
-        val options = Bundle().apply {
-            putInt(
-                TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE,
-                VideoProfile.STATE_BIDIRECTIONAL,
-            )
-            preferred?.let { putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, it) }
-        }
-        manager.placeCall(Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null), options)
-    }
-
     fun perform(@StringRes error: Int = SharedR.string.error_loading_failed, action: () -> Unit) {
         try {
             action()
@@ -120,20 +89,6 @@ internal class ContactProfileActions(private val context: Context) {
             notify(error)
         } catch (_: IllegalStateException) {
             notify(error)
-        }
-    }
-
-    private fun videoAccounts(): List<PhoneAccountHandle> {
-        val manager = telecom ?: return emptyList()
-        return try {
-            manager.callCapablePhoneAccounts.filter {
-                manager.getPhoneAccount(
-                    it,
-                )?.hasCapabilities(PhoneAccount.CAPABILITY_VIDEO_CALLING) ==
-                    true
-            }
-        } catch (_: SecurityException) {
-            emptyList()
         }
     }
 

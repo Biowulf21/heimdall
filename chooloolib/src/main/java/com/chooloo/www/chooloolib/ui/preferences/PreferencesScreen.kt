@@ -20,6 +20,7 @@ import com.chooloo.www.chooloolib.ui.components.ScreenTopBar
 @Composable
 fun PreferencesScreen(
     showDialerPreferences: Boolean,
+    onPhoneSetup: (() -> Unit)? = null,
     viewModel: PreferencesViewModel = hiltViewModel(),
 ) {
     val externalActions = rememberExternalActions()
@@ -51,6 +52,9 @@ fun PreferencesScreen(
             showDialerPreferences = showDialerPreferences,
             onDefaultPage = viewModel::onDefaultPage,
             onThemeMode = viewModel::onThemeMode,
+            leftHanded = settings.leftHanded,
+            onLeftHanded = viewModel::onLeftHanded,
+            onPhoneSetup = onPhoneSetup,
             accentRgb = settings.accentRgb,
             onAccentRgb = viewModel::onAccentRgb,
             onIsGroupRecentsEnabled = viewModel::onIsGroupRecentsEnabled,

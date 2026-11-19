@@ -1,0 +1,14 @@
+<resources>
+    <string name="phone_setup_title">Phone setup</string>
+    <string name="phone_setup_intro">Set Heimdall as your default phone app and grant access to calls, contacts, call history, and incoming-call alerts. You can review each request before allowing it.</string>
+    <string name="phone_setup_fullscreen">Allow full-screen alerts if you want Heimdall to show incoming calls over the lock screen.</string>
+    <string name="phone_setup_limited">Some phone features need additional access. You can finish setup later from Heimdall Settings.</string>
+    <string name="phone_setup_open_settings">Open Android settings</string>
+    <string name="phone_setup_call_permission">Allow phone access in Android settings, then tap Call again.</string>
+    <string name="phone_setup_unavailable">Phone setup is unavailable on this device.</string>
+    <string name="phone_setup_continue">Continue</string>
+    <string name="phone_setup_skip">Skip</string>
+    <string name="phone_setup_done">Done</string>
+    <string name="dialpad_choose_number">Choose a phone number</string>
+    <string name="dialpad_call_contact">Call %1$s</string>
+</resources>
