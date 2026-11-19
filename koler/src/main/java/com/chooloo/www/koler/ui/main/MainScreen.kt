@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chooloo.www.chooloolib.R
 import com.chooloo.www.chooloolib.ui.caller.CallerScreen
@@ -126,6 +127,8 @@ fun MainScreen(viewModel: MainViewModel) {
         visible = uiState.isDialpadOpen,
         skipPartiallyExpanded = true,
         onDismiss = viewModel::onDialpadClose,
+        showDragHandle = false,
+        horizontalPadding = 0.dp,
     ) {
         DialpadScreen(
             initialNumber = uiState.dialNumber,

@@ -11,4 +11,5 @@
     <string name="phone_setup_done">Done</string>
     <string name="dialpad_choose_number">Choose a phone number</string>
     <string name="dialpad_call_contact">Call %1$s</string>
+    <string name="dialpad_matching_contacts">Matching contacts</string>
 </resources>

@@ -96,6 +96,7 @@ fun ContactsList(
             AlphabetIndex(
                 sections = sections.entries.toList(),
                 listState = state,
+                onLeft = alphabetIndexOnLeft == true,
                 modifier = Modifier
                     .align(
                         if (alphabetIndexOnLeft ==

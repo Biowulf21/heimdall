@@ -3,7 +3,12 @@ package com.chooloo.www.koler.ui.main
 import android.Manifest.permission.READ_CONTACTS
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -22,10 +27,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -82,31 +89,53 @@ internal fun DialpadMatches(
     var choosing by rememberSaveable(query) { mutableStateOf<Long?>(null) }
 
     if (matches.isNotEmpty()) {
-        LazyColumn(modifier = Modifier.heightIn(max = 152.dp)) {
-            items(matches, key = { it.entry.contact.id }) { match ->
-                val contact = match.entry.contact
-                val callButton: @Composable () -> Unit = {
-                    IconButton(onClick = {
-                        match.numbers.singleOrNull()?.let(onCall) ?: run { choosing = contact.id }
-                    }) {
-                        Icon(
-                            Icons.Rounded.Call,
-                            stringResource(
-                                R.string.dialpad_call_contact,
+        Column {
+            Text(
+                text = stringResource(R.string.dialpad_matching_contacts),
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(start = 24.dp, top = 8.dp, bottom = 2.dp),
+            )
+            LazyColumn(modifier = Modifier.heightIn(max = 288.dp)) {
+                items(matches, key = { it.entry.contact.id }) { match ->
+                    val contact = match.entry.contact
+                    val callButton: @Composable () -> Unit = {
+                        IconButton(onClick = {
+                            match.numbers.singleOrNull()?.let(onCall)
+                                ?: run { choosing = contact.id }
+                        }) {
+                            Icon(
+                                Icons.Rounded.Call,
+                                stringResource(
+                                    R.string.dialpad_call_contact,
+                                    contact.name ?: match.numbers.first(),
+                                ),
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onOpenContact(contact.id) }
+                            .padding(horizontal = 24.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Avatar(contact.name, contact.photoUri, 36.dp)
+                        Column(Modifier.weight(1f)) {
+                            MatchText(
                                 contact.name ?: match.numbers.first(),
-                            ),
-                        )
+                                match.nameMatch,
+                                MaterialTheme.typography.bodyLarge,
+                            )
+                            MatchText(
+                                match.numbers.first(),
+                                match.numberMatch,
+                                MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        callButton()
                     }
                 }
-                ListItem(
-                    headlineContent = {
-                        MatchText(contact.name ?: match.numbers.first(), match.nameMatch)
-                    },
-                    supportingContent = { MatchText(match.numbers.first(), match.numberMatch) },
-                    leadingContent = { Avatar(contact.name, contact.photoUri, 40.dp) },
-                    trailingContent = callButton,
-                    modifier = Modifier.clickable { onOpenContact(contact.id) },
-                )
             }
         }
     }
@@ -138,7 +167,7 @@ internal fun DialpadMatches(
 }
 
 @Composable
-private fun MatchText(value: String, ranges: List<IntRange>) {
+private fun MatchText(value: String, ranges: List<IntRange>, style: TextStyle) {
     val accent = MaterialTheme.colorScheme.primary
     Text(
         text = buildAnnotatedString {
@@ -151,6 +180,7 @@ private fun MatchText(value: String, ranges: List<IntRange>) {
                 )
             }
         },
+        style = style,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
     )

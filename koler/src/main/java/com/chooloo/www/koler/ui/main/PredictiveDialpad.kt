@@ -1,6 +1,7 @@
 package com.chooloo.www.koler.ui.main
 
 import com.chooloo.www.chooloolib.domain.model.DialpadContact
+import com.chooloo.www.chooloolib.domain.model.phoneKeyLetters
 import java.text.Normalizer
 
 internal data class DialpadMatch(
@@ -51,17 +52,7 @@ private fun keyFor(letter: Char): Char? {
     letter.digitToIntOrNull()?.let { return it.digitToChar() }
     val base = Normalizer.normalize(letter.toString(), Normalizer.Form.NFD)
         .replace(combiningMarks, "").firstOrNull()?.uppercaseChar() ?: return null
-    return when (base) {
-        in 'A'..'C' -> '2'
-        in 'D'..'F' -> '3'
-        in 'G'..'I' -> '4'
-        in 'J'..'L' -> '5'
-        in 'M'..'O' -> '6'
-        in 'P'..'S' -> '7'
-        in 'T'..'V' -> '8'
-        in 'W'..'Z' -> '9'
-        else -> null
-    }
+    return phoneKeyLetters.entries.firstOrNull { base in it.value }?.key
 }
 
 private fun numberMatch(number: String, query: String): List<IntRange>? {

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.automirrored.rounded.AddToHomeScreen
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.Message
 import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Email
@@ -51,6 +53,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -65,6 +68,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -90,6 +94,7 @@ private enum class ContactAction(@StringRes val title: Int, val icon: ImageVecto
     CALL(SharedR.string.action_call, Icons.Rounded.Call),
     MESSAGE(SharedR.string.action_message, Icons.AutoMirrored.Rounded.Message),
     EMAIL(R.string.contact_email, Icons.Rounded.Email),
+    COPY(R.string.contact_copy_number, Icons.Rounded.ContentCopy),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,10 +115,14 @@ internal fun ContactProfileScreen(
     val actions = remember(context) { ContactProfileActions(context) }
     val list = rememberLazyListState()
     val collapsed by remember { derivedStateOf { list.firstVisibleItemIndex > 0 } }
-    val title = state.name ?: state.number ?: stringResource(SharedR.string.caller_unknown)
+    val title = state.name?.takeIf(String::isNotBlank)
+        ?: state.number?.takeIf(String::isNotBlank)
+        ?: stringResource(SharedR.string.caller_unknown)
     val contact = state.contact
     val phones = state.details.phones.filter { it.number.isNotBlank() }
-    val phoneNumbers = phones.map { it.number }.ifEmpty { listOfNotNull(state.number) }
+    val phoneNumbers = phones.map {
+        it.number
+    }.ifEmpty { listOfNotNull(state.number?.takeIf(String::isNotBlank)) }
     val emails = state.details.emails
     var selection by rememberSaveable { mutableStateOf<ContactAction?>(null) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
@@ -146,6 +155,8 @@ internal fun ContactProfileScreen(
         phoneNumbers
     }
 
+    fun copy(value: String) = external.copyToClipboard(value, R.string.contact_copied)
+
     fun perform(action: ContactAction, value: String) {
         when (action) {
             ContactAction.CALL -> {
@@ -155,6 +166,8 @@ internal fun ContactProfileScreen(
             ContactAction.MESSAGE -> external.openSms(value)
 
             ContactAction.EMAIL -> external.sendEmail(value)
+
+            ContactAction.COPY -> copy(value)
         }
     }
 
@@ -167,11 +180,28 @@ internal fun ContactProfileScreen(
         }
     }
 
+    val copyNumberAction: (() -> Unit)? = if (phoneNumbers.isEmpty()) {
+        null
+    } else {
+        { select(ContactAction.COPY) }
+    }
+
     MessageToast(message = state.message, onShown = viewModel::onMessageShown)
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background,
+                scrolledContainerColor = MaterialTheme.colorScheme.background,
+            ),
             title = {
-                if (collapsed) Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (collapsed) {
+                    CopyProfileTitle(
+                        title,
+                        MaterialTheme.typography.titleLarge,
+                        maxLines = 1,
+                        onCopy = copyNumberAction,
+                    )
+                }
             },
             navigationIcon = {
                 IconButton(onClick = onBack) {
@@ -228,11 +258,22 @@ internal fun ContactProfileScreen(
                             ),
                         ) {
                             Avatar(name = contact.name, photoUri = contact.photoUri, size = 104.dp)
-                            Text(
+                            CopyProfileTitle(
                                 title,
-                                style = MaterialTheme.typography.headlineMedium,
-                                textAlign = TextAlign.Center,
+                                MaterialTheme.typography.headlineMedium,
+                                maxLines = 3,
+                                onCopy = copyNumberAction,
+                                showIcon = false,
                             )
+                            if (copyNumberAction != null) {
+                                TextButton(onClick = copyNumberAction) {
+                                    Icon(Icons.Rounded.ContentCopy, contentDescription = null)
+                                    Text(
+                                        stringResource(R.string.contact_copy_number_label),
+                                        modifier = Modifier.padding(start = 8.dp),
+                                    )
+                                }
+                            }
                             state.details.organization?.let {
                                 Text(
                                     it,
@@ -244,7 +285,7 @@ internal fun ContactProfileScreen(
                     }
                     stickyHeader {
                         ProfileQuickActions(
-                            ContactAction.entries,
+                            ContactAction.entries.filter { it != ContactAction.COPY },
                             { valuesFor(it).isNotEmpty() },
                             ::select,
                         )
@@ -263,13 +304,17 @@ internal fun ContactProfileScreen(
                                     ).toString()
                                 },
                                 icon = Icons.Rounded.Call,
-                                onClick = { callNumber(number) },
+                                onClick = { copy(number) },
+                                onCall = { callNumber(number) },
                                 end = {
-                                    IconButton(onClick = { external.openSms(number) }) {
-                                        Icon(
-                                            Icons.AutoMirrored.Rounded.Message,
-                                            stringResource(SharedR.string.action_message),
-                                        )
+                                    Row {
+                                        CopyNumberButton { copy(number) }
+                                        IconButton(onClick = { external.openSms(number) }) {
+                                            Icon(
+                                                Icons.AutoMirrored.Rounded.Message,
+                                                stringResource(SharedR.string.action_message),
+                                            )
+                                        }
                                     }
                                 },
                             )
@@ -291,7 +336,13 @@ internal fun ContactProfileScreen(
                                 title = recent.number,
                                 subtitle = listOfNotNull(date, duration).joinToString(" · "),
                                 icon = Icons.Rounded.Call,
-                                end = { RecentTypeIcon(recent.type, contentDescription = null) },
+                                onClick = { copy(recent.number) },
+                                end = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        RecentTypeIcon(recent.type, contentDescription = null)
+                                        CopyNumberButton { copy(recent.number) }
+                                    }
+                                },
                             )
                         }
                     }
@@ -494,6 +545,7 @@ private fun ProfileRow(
     destructive: Boolean = false,
     onClick: (() -> Unit)? = null,
     end: @Composable (() -> Unit)? = null,
+    onCall: (() -> Unit)? = null,
 ) {
     Surface(
         shape = MaterialTheme.shapes.medium,
@@ -504,17 +556,74 @@ private fun ProfileRow(
             subtitle = subtitle,
             onClick = onClick,
             startContainer = {
-                Icon(
-                    icon,
-                    contentDescription = null,
-                    tint = if (destructive) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                )
+                if (onCall != null) {
+                    IconButton(onClick = onCall) {
+                        Icon(icon, stringResource(SharedR.string.action_call))
+                    }
+                } else {
+                    Icon(
+                        icon,
+                        contentDescription = null,
+                        tint = if (destructive) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    )
+                }
             },
             endContainer = end,
         )
+    }
+}
+
+@Composable
+private fun CopyProfileTitle(
+    title: String,
+    style: TextStyle,
+    maxLines: Int,
+    onCopy: (() -> Unit)?,
+    showIcon: Boolean = true,
+) {
+    if (onCopy == null) {
+        Text(title, style = style, maxLines = maxLines, overflow = TextOverflow.Ellipsis)
+    } else {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .clip(MaterialTheme.shapes.medium)
+                .clickable(
+                    onClickLabel = stringResource(R.string.contact_copy_number),
+                    role = Role.Button,
+                    onClick = onCopy,
+                )
+                .heightIn(min = 48.dp)
+                .padding(horizontal = 4.dp),
+        ) {
+            Text(
+                title,
+                style = style,
+                maxLines = maxLines,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            if (showIcon) {
+                Icon(
+                    Icons.Rounded.ContentCopy,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CopyNumberButton(onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        Icon(Icons.Rounded.ContentCopy, stringResource(R.string.contact_copy_number))
     }
 }

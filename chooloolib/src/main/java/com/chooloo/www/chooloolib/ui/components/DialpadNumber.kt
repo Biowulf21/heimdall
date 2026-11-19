@@ -8,10 +8,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import com.chooloo.www.chooloolib.ui.theme.Spacing
 
 @Composable
-fun DialpadNumber(number: String, modifier: Modifier = Modifier) {
+fun DialpadNumber(
+    number: String,
+    modifier: Modifier = Modifier,
+    verticalPadding: Dp = Spacing.Medium,
+) {
     val style = MaterialTheme.typography.headlineLarge
     Text(
         text = number,
@@ -24,6 +29,6 @@ fun DialpadNumber(number: String, modifier: Modifier = Modifier) {
         ),
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = Spacing.Medium),
+            .padding(vertical = verticalPadding),
     )
 }

@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.DialogWindowProvider
 import com.chooloo.www.chooloolib.ui.theme.Spacing
 
@@ -24,6 +25,8 @@ fun BottomSheet(
     visible: Boolean,
     skipPartiallyExpanded: Boolean = false,
     onDismiss: () -> Unit = {},
+    showDragHandle: Boolean = true,
+    horizontalPadding: Dp = Spacing.Page,
     content: @Composable () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
@@ -45,13 +48,17 @@ fun BottomSheet(
         ModalBottomSheet(
             sheetState = sheetState,
             onDismissRequest = onDismiss,
-            dragHandle = { BottomSheetDefaults.DragHandle() },
+            dragHandle = if (showDragHandle) {
+                { BottomSheetDefaults.DragHandle() }
+            } else {
+                null
+            },
         ) {
             TransparentNavigationBar()
             Box(
                 modifier = Modifier.padding(
-                    start = Spacing.Page,
-                    end = Spacing.Page,
+                    start = horizontalPadding,
+                    end = horizontalPadding,
                     bottom = Spacing.Medium,
                 ),
             ) {

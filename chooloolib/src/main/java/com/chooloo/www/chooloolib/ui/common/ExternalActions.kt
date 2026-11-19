@@ -12,6 +12,7 @@ import android.provider.ContactsContract
 import android.telecom.TelecomManager
 import android.telephony.PhoneNumberUtils
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -60,11 +61,14 @@ class ExternalActions(private val context: Context) {
         ),
     )
 
-    fun copyToClipboard(text: String) {
+    fun copyToClipboard(
+        text: String,
+        @StringRes feedback: Int = R.string.number_copied_to_clipboard,
+    ) {
         context.getSystemService(ClipboardManager::class.java)
             .setPrimaryClip(ClipData.newPlainText(text, text))
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            Toast.makeText(context, R.string.number_copied_to_clipboard, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, feedback, Toast.LENGTH_SHORT).show()
         }
     }
 
