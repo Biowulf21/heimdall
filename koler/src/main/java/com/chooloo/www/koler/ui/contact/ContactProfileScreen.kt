@@ -12,15 +12,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -242,24 +244,10 @@ internal fun ContactProfileScreen(
                         }
                     }
                     stickyHeader {
-                        FlowRow(
-                            modifier = Modifier.fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.background)
-                                .padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(
-                                6.dp,
-                                Alignment.CenterHorizontally,
-                            ),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            ContactAction.entries.forEach { action ->
-                                if (action != ContactAction.VIDEO || actions.canVideoCall) {
-                                    QuickAction(action, valuesFor(action).isNotEmpty()) {
-                                        select(action)
-                                    }
-                                }
-                            }
+                        val available = ContactAction.entries.filter {
+                            it != ContactAction.VIDEO || actions.canVideoCall
                         }
+                        ProfileQuickActions(available, { valuesFor(it).isNotEmpty() }, ::select)
                     }
                     if (phoneNumbers.isNotEmpty()) {
                         item { SectionHeading(SharedR.string.phones) }
@@ -421,15 +409,52 @@ internal fun ContactProfileScreen(
 }
 
 @Composable
-private fun QuickAction(action: ContactAction, enabled: Boolean, onClick: () -> Unit) {
+private fun ProfileQuickActions(
+    actions: List<ContactAction>,
+    isEnabled: (ContactAction) -> Boolean,
+    onClick: (ContactAction) -> Unit,
+) {
+    val gap = 8.dp
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(vertical = gap),
+    ) {
+        val fitting = (actions.size downTo 1).first { columns ->
+            columns == 1 || (maxWidth - gap * (columns - 1)) / columns >= 76.dp
+        }
+        val columns = if (actions.size == 4 && fitting == 3) 2 else fitting
+        val buttonWidth = ((maxWidth - gap * (columns - 1)) / columns).coerceAtMost(128.dp)
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            maxItemsInEachRow = columns,
+            horizontalArrangement = Arrangement.spacedBy(gap, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(gap),
+        ) {
+            actions.forEach { action ->
+                QuickAction(action, isEnabled(action), Modifier.width(buttonWidth)) {
+                    onClick(action)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun QuickAction(
+    action: ContactAction,
+    enabled: Boolean,
+    modifier: Modifier,
+    onClick: () -> Unit,
+) {
     val colors = MaterialTheme.colorScheme
     val shape = MaterialTheme.shapes.large
     val labelColor = if (enabled) colors.onSurface else colors.onSurfaceVariant
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-            .widthIn(min = 68.dp)
+        modifier = modifier
             .clip(shape)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
     ) {
@@ -437,16 +462,17 @@ private fun QuickAction(action: ContactAction, enabled: Boolean, onClick: () -> 
             shape = shape,
             color = if (enabled) colors.secondaryContainer else colors.surfaceContainer,
             contentColor = if (enabled) colors.onSecondaryContainer else colors.onSurfaceVariant,
-            modifier = Modifier.size(width = 56.dp, height = 48.dp),
+            modifier = Modifier.fillMaxWidth().height(60.dp),
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(action.icon, contentDescription = null)
+                Icon(action.icon, contentDescription = null, modifier = Modifier.size(28.dp))
             }
         }
         Text(
             text = stringResource(action.title),
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelLarge,
             color = labelColor,
+            textAlign = TextAlign.Center,
         )
     }
 }
