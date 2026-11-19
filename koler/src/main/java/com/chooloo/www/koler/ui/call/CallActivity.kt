@@ -4,13 +4,19 @@ import android.app.KeyguardManager
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.chooloo.www.chooloolib.ui.common.BaseActivity
+import com.chooloo.www.koler.data.repository.CallRepositoryImpl
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class CallActivity : BaseActivity() {
+    @Inject lateinit var callRepository: CallRepositoryImpl
+
     private val callViewModel: CallViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,8 +24,9 @@ class CallActivity : BaseActivity() {
         showWhenLocked()
         if (savedInstanceState == null) showKeypadIfRequested(intent)
         finishWhenCallsEnd()
-        setChoolooContent {
-            CallScreen(callViewModel = callViewModel)
+        setChoolooContent(heimdall = true) {
+            val videoCalls by callRepository.videoCalls.collectAsStateWithLifecycle()
+            CallScreen(callViewModel = callViewModel, videoCalls = videoCalls)
         }
     }
 

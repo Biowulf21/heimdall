@@ -1,7 +1,6 @@
 package com.chooloo.www.koler.ui.main
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Dialpad
 import androidx.compose.material.icons.rounded.History
@@ -38,8 +37,8 @@ fun MainNavigationBar(
             contentDescription = stringResource(R.string.cd_dialpad),
             onClick = onDialpadClick,
             size = Sizes.Button,
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             hasShadow = false,
         )
         TabBubble(

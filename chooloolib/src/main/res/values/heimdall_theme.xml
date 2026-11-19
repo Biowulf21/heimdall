@@ -1,0 +1,8 @@
+<resources>
+    <string name="pref_title_theme_color">Theme color</string>
+    <string name="theme_material_colors">Material swatches</string>
+    <string name="theme_custom_color">Custom color</string>
+    <string name="theme_hex_error">Enter a color as #RRGGBB.</string>
+    <string name="theme_apply">Apply</string>
+    <string name="error_contact_update_failed">Couldn\'t update the contact</string>
+</resources>

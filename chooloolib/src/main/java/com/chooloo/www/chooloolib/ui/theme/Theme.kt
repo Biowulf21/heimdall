@@ -22,7 +22,11 @@ import androidx.core.view.WindowCompat
 import com.chooloo.www.chooloolib.domain.enum.ThemeMode
 
 @Composable
-fun ChoolooTheme(themeMode: ThemeMode = ThemeMode.SYSTEM, content: @Composable () -> Unit) {
+fun ChoolooTheme(
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
+    accentRgb: Int? = null,
+    content: @Composable () -> Unit,
+) {
     val isDark = when (themeMode) {
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
         ThemeMode.LIGHT -> false
@@ -30,6 +34,8 @@ fun ChoolooTheme(themeMode: ThemeMode = ThemeMode.SYSTEM, content: @Composable (
     }
     val context = LocalContext.current
     val colorScheme = when {
+        accentRgb != null -> heimdallColors(accentRgb, isDark)
+
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
             if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
 
@@ -51,8 +57,8 @@ fun ChoolooTheme(themeMode: ThemeMode = ThemeMode.SYSTEM, content: @Composable (
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = ChoolooTypography,
-        shapes = ChoolooShapes,
+        typography = if (accentRgb == null) ChoolooTypography else HeimdallTypography,
+        shapes = if (accentRgb == null) ChoolooShapes else HeimdallShapes,
     ) {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Box(

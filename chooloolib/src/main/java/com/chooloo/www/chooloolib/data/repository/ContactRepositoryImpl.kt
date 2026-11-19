@@ -128,8 +128,24 @@ class ContactRepositoryImpl @Inject constructor(
         if (deleted == 0) throw ContentException.RowNotChanged(Contacts.CONTENT_URI, contactId)
     }
 
-    override suspend fun setFavorite(contactId: Long, isFavorite: Boolean) {
-        val values = ContentValues().apply { put(Contacts.STARRED, if (isFavorite) 1 else 0) }
+    override suspend fun setFavorite(contactId: Long, isFavorite: Boolean) = updateContact(
+        contactId,
+        ContentValues().apply {
+            put(Contacts.STARRED, if (isFavorite) 1 else 0)
+        },
+    )
+
+    override suspend fun setRingtone(contactId: Long, ringtone: String?) =
+        updateContact(contactId, ContentValues().apply { put(Contacts.CUSTOM_RINGTONE, ringtone) })
+
+    override suspend fun setSendsToVoicemail(contactId: Long, enabled: Boolean) = updateContact(
+        contactId,
+        ContentValues().apply {
+            put(Contacts.SEND_TO_VOICEMAIL, if (enabled) 1 else 0)
+        },
+    )
+
+    private suspend fun updateContact(contactId: Long, values: ContentValues) {
         val updated = withContext(ioDispatcher) {
             contentResolver.update(
                 ContentUris.withAppendedId(Contacts.CONTENT_URI, contactId),
@@ -159,6 +175,9 @@ class ContactRepositoryImpl @Inject constructor(
         name = row.string(Contacts.DISPLAY_NAME_PRIMARY),
         photoUri = row.string(Contacts.PHOTO_URI) ?: row.string(Contacts.PHOTO_THUMBNAIL_URI),
         isFavorite = row.int(Contacts.STARRED) == 1,
+        lookupKey = row.string(Contacts.LOOKUP_KEY),
+        customRingtone = row.string(Contacts.CUSTOM_RINGTONE),
+        sendsToVoicemail = row.int(Contacts.SEND_TO_VOICEMAIL) == 1,
     )
 
     companion object {
@@ -167,6 +186,9 @@ class ContactRepositoryImpl @Inject constructor(
         private val PROJECTION = arrayOf(
             Contacts._ID,
             Contacts.STARRED,
+            Contacts.LOOKUP_KEY,
+            Contacts.CUSTOM_RINGTONE,
+            Contacts.SEND_TO_VOICEMAIL,
             Contacts.PHOTO_URI,
             Contacts.PHOTO_THUMBNAIL_URI,
             Contacts.DISPLAY_NAME_PRIMARY,

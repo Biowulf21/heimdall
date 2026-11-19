@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.chooloo.www.chooloolib.domain.enum.Page
 import com.chooloo.www.chooloolib.domain.enum.ThemeMode
@@ -25,6 +26,7 @@ class PreferenceRepositoryImpl @Inject constructor(private val dataStore: DataSt
                 defaultPage = enumOf(preferences, DEFAULT_PAGE, PAGE_KEYS) ?: defaults.defaultPage,
                 themeMode =
                     enumOf(preferences, THEME_MODE, THEME_MODE_KEYS) ?: defaults.themeMode,
+                accentRgb = preferences[ACCENT_RGB] ?: defaults.accentRgb,
                 isGroupRecentsEnabled =
                     preferences[GROUP_RECENTS] ?: defaults.isGroupRecentsEnabled,
                 isDialpadTonesEnabled =
@@ -39,6 +41,8 @@ class PreferenceRepositoryImpl @Inject constructor(private val dataStore: DataSt
 
     override suspend fun setThemeMode(themeMode: ThemeMode) =
         set(THEME_MODE, THEME_MODE_KEYS.getValue(themeMode))
+
+    override suspend fun setAccentRgb(rgb: Int) = set(ACCENT_RGB, rgb)
 
     override suspend fun setIsGroupRecentsEnabled(isEnabled: Boolean) =
         set(GROUP_RECENTS, isEnabled)
@@ -60,6 +64,7 @@ class PreferenceRepositoryImpl @Inject constructor(private val dataStore: DataSt
     ): T? = preferences[key]?.let { stored -> keys.entries.firstOrNull { it.value == stored }?.key }
 
     private companion object {
+        val ACCENT_RGB = intPreferencesKey("accent_rgb")
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val DEFAULT_PAGE = stringPreferencesKey("default_page")
         val GROUP_RECENTS = booleanPreferencesKey("group_recents")

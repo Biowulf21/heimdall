@@ -14,6 +14,10 @@ import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Vibration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.chooloo.www.chooloolib.R
@@ -37,6 +41,12 @@ private enum class PreferenceItem(
     val isDialerOnly: Boolean = false,
 ) {
     THEME_MODE(PreferenceSection.APPEARANCE, Icons.Rounded.Palette, R.string.pref_title_theme_mode),
+    THEME_COLOR(
+        PreferenceSection.APPEARANCE,
+        Icons.Rounded.Palette,
+        R.string.pref_title_theme_color,
+        isDialerOnly = true,
+    ),
     DEFAULT_PAGE(
         PreferenceSection.DIALER,
         Icons.Rounded.Home,
@@ -90,6 +100,8 @@ fun Preferences(
     showDialerPreferences: Boolean,
     onDefaultPage: (Page) -> Unit,
     onThemeMode: (ThemeMode) -> Unit,
+    accentRgb: Int,
+    onAccentRgb: (Int) -> Unit,
     onIsGroupRecentsEnabled: (Boolean) -> Unit,
     onIsDialpadTonesEnabled: (Boolean) -> Unit,
     onIsDialpadVibrateEnabled: (Boolean) -> Unit,
@@ -100,6 +112,11 @@ fun Preferences(
     onReportBugsClick: () -> Unit,
     onDonateClick: () -> Unit,
 ) {
+    var isThemeOpen by rememberSaveable { mutableStateOf(false) }
+    if (isThemeOpen) {
+        ThemeColorDialog(accentRgb, onAccentRgb) { isThemeOpen = false }
+    }
+
     val preferences = PreferenceItem.entries.filter { showDialerPreferences || !it.isDialerOnly }
     val sectionTitles = PreferenceSection.entries.associateWith { stringResource(it.titleRes) }
 
@@ -121,6 +138,12 @@ fun Preferences(
                     label = { stringResource(Labels.titleRes(it)) },
                     onValueSelected = onThemeMode,
                 )
+
+                PreferenceItem.THEME_COLOR -> ActionPreferenceListItem(
+                    icon,
+                    title,
+                    accentHex(accentRgb),
+                ) { isThemeOpen = true }
 
                 PreferenceItem.DEFAULT_PAGE -> ChoicePreferenceListItem(
                     icon = icon,

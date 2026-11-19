@@ -149,8 +149,21 @@ class CallerViewModel @AssistedInject constructor(
         telecomRepository.callNumber(number)
     }
 
-    fun onDeleteConfirmed() = launch(UserMessage.CONTACT_DELETION_FAILED) {
-        uiState.value.contact?.let { contactRepository.deleteContact(it.id) }
+    fun onDeleteConfirmed(
+        onDeleted: () -> Unit = {
+        },
+    ) = launch(UserMessage.CONTACT_DELETION_FAILED) {
+        val contact = uiState.value.contact ?: return@launch
+        contactRepository.deleteContact(contact.id)
+        onDeleted()
+    }
+
+    fun onSetRingtone(ringtone: String?) = launch(UserMessage.CONTACT_UPDATE_FAILED) {
+        uiState.value.contact?.let { contactRepository.setRingtone(it.id, ringtone) }
+    }
+
+    fun onSetSendsToVoicemail(enabled: Boolean) = launch(UserMessage.CONTACT_UPDATE_FAILED) {
+        uiState.value.contact?.let { contactRepository.setSendsToVoicemail(it.id, enabled) }
     }
 
     fun onToggleFavorite() = launch(UserMessage.CONTACT_FAVORITE_CHANGE_FAILED) {

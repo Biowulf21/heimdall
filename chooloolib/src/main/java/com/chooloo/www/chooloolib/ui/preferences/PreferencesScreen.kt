@@ -51,6 +51,8 @@ fun PreferencesScreen(
             showDialerPreferences = showDialerPreferences,
             onDefaultPage = viewModel::onDefaultPage,
             onThemeMode = viewModel::onThemeMode,
+            accentRgb = settings.accentRgb,
+            onAccentRgb = viewModel::onAccentRgb,
             onIsGroupRecentsEnabled = viewModel::onIsGroupRecentsEnabled,
             onIsDialpadTonesEnabled = viewModel::onIsDialpadTonesEnabled,
             onIsDialpadVibrateEnabled = viewModel::onIsDialpadVibrateEnabled,

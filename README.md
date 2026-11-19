@@ -1,18 +1,17 @@
-<p align="center">
-	       <img src="./koler/src/main/ic_launcher-web.png" width=160 height=160>
-</p>
+# Heimdall
 
-<h1 align="center">
-          Koler
-</h1>
+Heimdall is an Android dialer forked from [Chooloo/Koler](https://github.com/Chooloo/koler).
+It installs alongside Koler under the app ID `io.github.biowulf21.heimdall`.
+Install the signed APK on Android 10 or later and choose Heimdall when Android asks for the default phone app.
 
-<a href="https://hosted.weblate.org/engage/koler/">
-<img src="https://hosted.weblate.org/widgets/koler/-/svg-badge.svg" alt="Translation startus" />
-</a>
+Heimdall reads contacts and call history through Android's local providers. It includes no
+analytics or crash-reporting SDK and requests no internet access. Actions such as Message,
+Email, and Share open another app at your request.
 
-<p align="center">
-         A dialer, but it's simple and looks pretty good honestly!
-</p>
+Source is available under the [GNU GPL v3](LICENSE). The build target is
+`./gradlew :koler:assembleRelease`. Sign the resulting release APK with your own key for sideloading.
+
+## About upstream Koler
 
 Copylefted libre MVVM Android app. \
 Designed with the user in mind. \

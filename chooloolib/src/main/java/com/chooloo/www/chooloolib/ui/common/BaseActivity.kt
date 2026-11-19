@@ -23,12 +23,18 @@ abstract class BaseActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
     }
 
-    protected fun setChoolooContent(content: @Composable () -> Unit) {
+    protected fun setChoolooContent(heimdall: Boolean = false, content: @Composable () -> Unit) {
         setContent {
             val settings by preferenceRepository.settings.collectAsStateWithLifecycle(
                 initialValue = null,
             )
-            settings?.let { ChoolooTheme(themeMode = it.themeMode, content = content) }
+            settings?.let {
+                ChoolooTheme(
+                    themeMode = it.themeMode,
+                    accentRgb = it.accentRgb.takeIf { heimdall },
+                    content = content,
+                )
+            }
         }
     }
 }

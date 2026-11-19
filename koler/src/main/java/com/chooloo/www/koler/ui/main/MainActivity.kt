@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import com.chooloo.www.chooloolib.ui.common.BaseActivity
 import com.chooloo.www.koler.AppConstants
+import com.chooloo.www.koler.ui.contact.ContactProfileActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -14,7 +15,7 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null) handleIntent(intent)
-        setChoolooContent {
+        setChoolooContent(heimdall = true) {
             MainScreen(viewModel = mainViewModel)
         }
     }
@@ -26,6 +27,10 @@ class MainActivity : BaseActivity() {
 
     private fun handleIntent(intent: Intent) {
         when (intent.action) {
+            ContactProfileActivity.OPEN_SHORTCUT -> {
+                ContactProfileActivity.fromShortcut(this, intent)?.let(::startActivity)
+            }
+
             AppConstants.ACTION_SHOW_MISSED_CALLS -> mainViewModel.onMissedCallsOpened()
 
             Intent.ACTION_DIAL, Intent.ACTION_VIEW ->

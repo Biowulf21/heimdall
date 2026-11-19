@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.provider.ContactsContract
 import android.telecom.TelecomManager
@@ -33,7 +34,8 @@ class ExternalActions(private val context: Context) {
             .putExtra(Intent.EXTRA_EMAIL, arrayOf(context.getString(R.string.support_email))),
     )
 
-    fun sendEmail(address: String) = launch(Intent(Intent.ACTION_SENDTO, "mailto:$address".toUri()))
+    fun sendEmail(address: String) =
+        launch(Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", address, null)))
 
     fun openSms(number: String) = launch(
         Intent(Intent.ACTION_SENDTO, "smsto:${PhoneNumberUtils.normalizeNumber(number)}".toUri()),
@@ -71,6 +73,8 @@ class ExternalActions(private val context: Context) {
             context.startActivity(intent)
         } catch (_: ActivityNotFoundException) {
             Toast.makeText(context, R.string.error_no_app_found, Toast.LENGTH_SHORT).show()
+        } catch (_: SecurityException) {
+            Toast.makeText(context, R.string.error_loading_failed, Toast.LENGTH_SHORT).show()
         }
     }
 }

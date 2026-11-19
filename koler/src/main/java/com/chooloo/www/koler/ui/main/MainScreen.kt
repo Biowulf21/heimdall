@@ -5,7 +5,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,10 +19,10 @@ import com.chooloo.www.chooloolib.ui.components.FloatingBubble
 import com.chooloo.www.chooloolib.ui.components.Reveal
 import com.chooloo.www.chooloolib.ui.contacts.ContactsScreen
 import com.chooloo.www.chooloolib.ui.dialpad.DialpadScreen
-import com.chooloo.www.chooloolib.ui.home.HomeScaffold
 import com.chooloo.www.chooloolib.ui.preferences.PreferencesScreen
 import com.chooloo.www.chooloolib.ui.recents.RecentsScreen
 import com.chooloo.www.koler.ui.call.CallActivity
+import com.chooloo.www.koler.ui.contact.ContactProfileActivity
 import com.chooloo.www.koler.ui.main.MainViewModel.Tab
 
 @Composable
@@ -36,7 +35,7 @@ fun MainScreen(viewModel: MainViewModel) {
 
     DefaultDialerRequest()
 
-    HomeScaffold(
+    DialerHomeScaffold(
         title = stringResource(if (tab == Tab.RECENTS) R.string.recents else R.string.contacts),
         isSearching = uiState.isSearching,
         searchText = uiState.searchText,
@@ -87,7 +86,9 @@ fun MainScreen(viewModel: MainViewModel) {
             Tab.CONTACTS -> ContactsScreen(
                 filter = uiState.searchText,
                 contentPadding = listPadding,
-                onItemClick = { viewModel.onCallerSelected(CallerTarget.ContactTarget(it.id)) },
+                onItemClick = {
+                    context.startActivity(ContactProfileActivity.intent(context, it.id))
+                },
             )
         }
     }

@@ -44,9 +44,12 @@ fun CallContent(
     onAccept: () -> Unit,
     onHangup: () -> Unit,
     onManage: () -> Unit,
+    video: (@Composable () -> Unit)? = null,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val header = @Composable { CallerHeader(callerName, avatarName, status, callerPhotoUri) }
+        val header = @Composable {
+            CallerHeader(callerName, avatarName, status, callerPhotoUri, video)
+        }
         val buttons = @Composable {
             if (callsState.showsActions) {
                 CallActions(actions = actions, onActionClick = onActionClick)
@@ -86,12 +89,22 @@ private fun ScrollingColumn(minHeight: Dp, modifier: Modifier, content: @Composa
 }
 
 @Composable
-private fun CallerHeader(name: String, avatarName: String?, status: String?, photoUri: String?) {
+private fun CallerHeader(
+    name: String,
+    avatarName: String?,
+    status: String?,
+    photoUri: String?,
+    video: (@Composable () -> Unit)?,
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.Small),
     ) {
-        Avatar(name = avatarName, photoUri = photoUri, size = Sizes.AvatarLarge)
+        if (video == null) {
+            Avatar(name = avatarName, photoUri = photoUri, size = Sizes.AvatarLarge)
+        } else {
+            video()
+        }
         Text(
             text = name,
             style = MaterialTheme.typography.headlineMedium,

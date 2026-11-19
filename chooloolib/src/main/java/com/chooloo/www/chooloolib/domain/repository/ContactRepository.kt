@@ -11,4 +11,6 @@ interface ContactRepository {
     suspend fun contactIdOf(link: String): Long?
     suspend fun deleteContact(contactId: Long)
     suspend fun setFavorite(contactId: Long, isFavorite: Boolean)
+    suspend fun setRingtone(contactId: Long, ringtone: String?)
+    suspend fun setSendsToVoicemail(contactId: Long, enabled: Boolean)
 }

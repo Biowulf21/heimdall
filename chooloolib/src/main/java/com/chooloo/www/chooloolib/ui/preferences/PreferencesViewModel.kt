@@ -35,6 +35,8 @@ class PreferencesViewModel @Inject constructor(
 
     fun onDefaultPage(page: Page) = update { setDefaultPage(page) }
 
+    fun onAccentRgb(rgb: Int) = update { setAccentRgb(rgb) }
+
     fun onThemeMode(themeMode: ThemeMode) = update { setThemeMode(themeMode) }
 
     fun onIsGroupRecentsEnabled(isEnabled: Boolean) = update { setIsGroupRecentsEnabled(isEnabled) }

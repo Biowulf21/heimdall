@@ -19,6 +19,8 @@ class FakePreferenceRepository(initial: Settings = Settings()) : PreferenceRepos
         it.copy(themeMode = themeMode)
     }
 
+    override suspend fun setAccentRgb(rgb: Int) = state.update { it.copy(accentRgb = rgb) }
+
     override suspend fun setIsGroupRecentsEnabled(isEnabled: Boolean) = state.update {
         it.copy(isGroupRecentsEnabled = isEnabled)
     }

@@ -5,6 +5,7 @@ import com.chooloo.www.chooloolib.R
 
 enum class UserMessage(@StringRes val textRes: Int) {
     CALL_FAILED(R.string.error_call_failed),
+    CONTACT_UPDATE_FAILED(R.string.error_contact_update_failed),
     CONTACT_DELETION_FAILED(R.string.error_contact_deletion_failed),
     CONTACT_FAVORITE_CHANGE_FAILED(R.string.error_contact_favorite_change_failed),
     CONTACT_BLOCK_CHANGE_FAILED(R.string.error_contact_block_change_failed),

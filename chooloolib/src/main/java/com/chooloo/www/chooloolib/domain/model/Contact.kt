@@ -6,4 +6,7 @@ data class Contact(
     val photoUri: String? = null,
     val number: String? = null,
     val isFavorite: Boolean = false,
+    val lookupKey: String? = null,
+    val customRingtone: String? = null,
+    val sendsToVoicemail: Boolean = false,
 )
