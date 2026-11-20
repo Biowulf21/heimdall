@@ -37,6 +37,8 @@ fun ContactsList(
     onItemLongClick: ((Contact) -> Unit)?,
     loadingState: LoadingState,
     alphabetIndexOnLeft: Boolean? = null,
+    circularLetterPreview: Boolean = false,
+    selectedIds: Set<Long> = emptySet(),
 ) {
     val state = rememberLazyListState()
     val rows = remember(items, withFavorites, alphabetIndexOnLeft != null) {
@@ -87,6 +89,7 @@ fun ContactsList(
             item = { row ->
                 ContactListItem(
                     contact = row.contact,
+                    isSelected = row.contact.id in selectedIds,
                     onClick = { onItemClick(row.contact) },
                     onLongClick = onItemLongClick?.let { { it(row.contact) } },
                 )
@@ -97,6 +100,7 @@ fun ContactsList(
                 sections = sections.entries.toList(),
                 listState = state,
                 onLeft = alphabetIndexOnLeft == true,
+                circularPreview = circularLetterPreview,
                 modifier = Modifier
                     .align(
                         if (alphabetIndexOnLeft ==

@@ -23,6 +23,10 @@ class FakePreferenceRepository(initial: Settings = Settings()) : PreferenceRepos
         it.copy(leftHanded = enabled)
     }
 
+    override suspend fun setCircularLetterPreview(enabled: Boolean) = state.update {
+        it.copy(circularLetterPreview = enabled)
+    }
+
     override suspend fun completePhoneSetup() = state.update { it.copy(phoneSetupCompleted = true) }
 
     override suspend fun setAccentRgb(rgb: Int) = state.update { it.copy(accentRgb = rgb) }

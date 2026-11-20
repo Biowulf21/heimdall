@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -47,6 +48,7 @@ internal fun DialerHomeScaffold(
     onSearchTextChange: (String) -> Unit,
     onSearchClose: () -> Unit,
     onSettingsOpen: () -> Unit,
+    selectionActions: (@Composable RowScope.() -> Unit)? = null,
     bottomBarContent: @Composable BoxScope.() -> Unit,
     content: @Composable ColumnScope.(PaddingValues) -> Unit,
 ) {
@@ -61,11 +63,14 @@ internal fun DialerHomeScaffold(
 
     Box(Modifier.fillMaxSize().imePadding()) {
         Column(Modifier.fillMaxSize()) {
-            ScreenTopBar(title = title, actions = {
-                IconButton(onClick = onSettingsOpen) {
-                    Icon(Icons.Rounded.Settings, stringResource(R.string.settings))
-                }
-            })
+            ScreenTopBar(
+                title = title,
+                actions = selectionActions ?: {
+                    IconButton(onClick = onSettingsOpen) {
+                        Icon(Icons.Rounded.Settings, stringResource(R.string.settings))
+                    }
+                },
+            )
             TextField(
                 value = searchText,
                 onValueChange = onSearchTextChange,

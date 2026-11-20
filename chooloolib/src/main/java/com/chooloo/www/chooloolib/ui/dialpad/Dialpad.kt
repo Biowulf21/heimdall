@@ -50,7 +50,7 @@ fun Dialpad(
     leftHanded: Boolean = false,
     suggestions: (@Composable () -> Unit)? = null,
 ) {
-    val addContactOnStart = leftHanded == (LocalLayoutDirection.current == LayoutDirection.Ltr)
+    val addContactOnStart = leftHanded == (LocalLayoutDirection.current == LayoutDirection.Rtl)
     BoxWithConstraints(modifier.fillMaxSize()) {
         val viewportHeight = maxHeight
         val scrollPage = viewportHeight < 460.dp

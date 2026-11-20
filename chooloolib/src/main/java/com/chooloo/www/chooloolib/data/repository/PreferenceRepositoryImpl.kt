@@ -27,6 +27,8 @@ class PreferenceRepositoryImpl @Inject constructor(private val dataStore: DataSt
                 themeMode =
                     enumOf(preferences, THEME_MODE, THEME_MODE_KEYS) ?: defaults.themeMode,
                 leftHanded = preferences[LEFT_HANDED] ?: defaults.leftHanded,
+                circularLetterPreview =
+                    preferences[CIRCULAR_LETTER_PREVIEW] ?: defaults.circularLetterPreview,
                 phoneSetupCompleted = preferences[SETUP_COMPLETED] ?: defaults.phoneSetupCompleted,
                 accentRgb = preferences[ACCENT_RGB] ?: defaults.accentRgb,
                 isGroupRecentsEnabled =
@@ -45,6 +47,9 @@ class PreferenceRepositoryImpl @Inject constructor(private val dataStore: DataSt
         set(THEME_MODE, THEME_MODE_KEYS.getValue(themeMode))
 
     override suspend fun setLeftHanded(enabled: Boolean) = set(LEFT_HANDED, enabled)
+
+    override suspend fun setCircularLetterPreview(enabled: Boolean) =
+        set(CIRCULAR_LETTER_PREVIEW, enabled)
 
     override suspend fun completePhoneSetup() = set(SETUP_COMPLETED, true)
 
@@ -71,6 +76,7 @@ class PreferenceRepositoryImpl @Inject constructor(private val dataStore: DataSt
 
     private companion object {
         val LEFT_HANDED = booleanPreferencesKey("left_handed")
+        val CIRCULAR_LETTER_PREVIEW = booleanPreferencesKey("circular_letter_preview")
         val SETUP_COMPLETED = booleanPreferencesKey("phone_setup_completed")
         val ACCENT_RGB = intPreferencesKey("accent_rgb")
         val THEME_MODE = stringPreferencesKey("theme_mode")

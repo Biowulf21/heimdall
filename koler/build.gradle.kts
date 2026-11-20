@@ -17,8 +17,8 @@ android {
         applicationId = "io.github.biowulf21.heimdall"
         minSdk = libs.versions.min.sdk.get().toInt()
         targetSdk = libs.versions.target.sdk.get().toInt()
-        versionCode = 85
-        versionName = "v1.8.1"
+        versionCode = 86
+        versionName = "v1.8.2"
     }
 
     buildTypes {

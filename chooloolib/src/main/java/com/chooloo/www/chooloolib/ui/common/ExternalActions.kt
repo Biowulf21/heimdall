@@ -3,18 +3,20 @@ package com.chooloo.www.chooloolib.ui.common
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.provider.ContactsContract
 import android.telecom.TelecomManager
 import android.telephony.PhoneNumberUtils
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import com.chooloo.www.chooloolib.R
@@ -22,10 +24,24 @@ import com.chooloo.www.chooloolib.R
 @Composable
 fun rememberExternalActions(): ExternalActions {
     val context = LocalContext.current
-    return remember(context) { ExternalActions(context) }
+    var newContactNumber by rememberSaveable { mutableStateOf<String?>(null) }
+    var editingContactId by rememberSaveable { mutableStateOf<Long?>(null) }
+    if (newContactNumber != null || editingContactId != null) {
+        ContactEditorDialog(newContactNumber.orEmpty(), editingContactId) {
+            newContactNumber = null
+            editingContactId = null
+        }
+    }
+    return remember(context) {
+        ExternalActions(context, { newContactNumber = it }, { editingContactId = it })
+    }
 }
 
-class ExternalActions(private val context: Context) {
+class ExternalActions(
+    private val context: Context,
+    private val onCreateContact: (String) -> Unit,
+    private val onEditContact: (Long) -> Unit,
+) {
     fun openUrl(url: String) = launch(Intent(Intent.ACTION_VIEW, url.toUri()))
 
     fun openStoreListing() = openUrl("market://details?id=${context.packageName}")
@@ -48,18 +64,9 @@ class ExternalActions(private val context: Context) {
         context.getSystemService(TelecomManager::class.java).createManageBlockedNumbersIntent(),
     )
 
-    fun createContact(number: String? = null) = launch(
-        Intent(Intent.ACTION_INSERT)
-            .setType(ContactsContract.Contacts.CONTENT_TYPE)
-            .apply { number?.let { putExtra(ContactsContract.Intents.Insert.PHONE, it) } },
-    )
+    fun createContact(number: String? = null) = onCreateContact(number.orEmpty())
 
-    fun editContact(contactId: Long) = launch(
-        Intent(
-            Intent.ACTION_EDIT,
-            ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId),
-        ),
-    )
+    fun editContact(contactId: Long) = onEditContact(contactId)
 
     fun copyToClipboard(
         text: String,

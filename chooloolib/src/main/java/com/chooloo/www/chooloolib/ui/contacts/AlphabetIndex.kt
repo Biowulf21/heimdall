@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -68,10 +69,12 @@ internal fun AlphabetIndex(
     sections: List<Map.Entry<String, Int>>,
     listState: LazyListState,
     onLeft: Boolean,
+    circularPreview: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
     var dragIndex by remember { mutableStateOf<Int?>(null) }
+    var draggingRail by remember { mutableStateOf(false) }
     val interacting = listState.isScrollInProgress || dragIndex != null
     var showLetter by remember { mutableStateOf(false) }
     var previewRequest by remember { mutableIntStateOf(0) }
@@ -94,6 +97,7 @@ internal fun AlphabetIndex(
     val description = stringResource(R.string.contact_alphabet_index)
     val accessibility = sections.map {
         CustomAccessibilityAction(stringResource(R.string.contact_jump_section, it.key)) {
+            previewRequest++
             scope.launch { listState.scrollToItem(it.value) }
             true
         }
@@ -105,7 +109,7 @@ internal fun AlphabetIndex(
         val highlightHeight = rowHeight.coerceAtMost(24.dp)
         val direction = if (onLeft) 1 else -1
         val bend by animateFloatAsState(
-            targetValue = if (showLetter) 1f else 0f,
+            targetValue = if (draggingRail) 1f else 0f,
             animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
             label = "Alphabet curve",
         )
@@ -151,11 +155,17 @@ internal fun AlphabetIndex(
                                     it.id == down.id
                                 }
                                 if (pointer?.pressed == true) {
+                                    if (abs(pointer.position.y - down.position.y) >
+                                        viewConfiguration.touchSlop
+                                    ) {
+                                        draggingRail = true
+                                    }
                                     move(pointer.position.y)
                                     pointer.consume()
                                 }
                             } while (pointer?.pressed == true)
                         } finally {
+                            draggingRail = false
                             dragIndex = null
                         }
                     }
@@ -221,7 +231,7 @@ internal fun AlphabetIndex(
                 Surface(
                     color = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    shape = MaterialTheme.shapes.medium,
+                    shape = if (circularPreview) CircleShape else RoundedCornerShape(14.dp),
                     modifier = Modifier.size(44.dp),
                 ) {
                     Box(contentAlignment = Alignment.Center) {

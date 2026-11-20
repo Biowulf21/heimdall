@@ -37,6 +37,8 @@ class PreferencesViewModel @Inject constructor(
 
     fun onLeftHanded(enabled: Boolean) = update { setLeftHanded(enabled) }
 
+    fun onCircularLetterPreview(enabled: Boolean) = update { setCircularLetterPreview(enabled) }
+
     fun onAccentRgb(rgb: Int) = update { setAccentRgb(rgb) }
 
     fun onThemeMode(themeMode: ThemeMode) = update { setThemeMode(themeMode) }

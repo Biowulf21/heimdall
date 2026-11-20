@@ -6,7 +6,33 @@
     <string name="theme_apply">Apply</string>
     <string name="error_contact_update_failed">Couldn\'t update the contact</string>
     <string name="pref_left_handed">Left-handed mode</string>
+    <string name="pref_circular_letter_preview">Circular letter preview</string>
+    <string name="pref_circular_letter_preview_description">Turn off to use a squircle</string>
     <string name="pref_phone_setup">Phone setup</string>
     <string name="contact_alphabet_index">Contacts alphabet index</string>
     <string name="contact_jump_section">Jump to %1$s</string>
+    <string name="new_contact_title">Add contact</string>
+    <string name="contact_editor_close">Close contact editor</string>
+    <string name="edit_contact_title">Edit contact</string>
+    <string name="edit_contact_read_only">This contact is read-only.</string>
+    <string name="edit_contact_load_failed">Couldn’t open this contact. It may have been removed or access may be restricted.</string>
+    <string name="edit_contact_add_phone">Add phone number</string>
+    <string name="edit_contact_add_email">Add email</string>
+    <string name="new_contact_email">Email</string>
+    <string name="contact_editor_first_name">First name</string>
+    <string name="contact_editor_last_name">Last name</string>
+    <string name="contact_editor_company">Company</string>
+    <string name="new_contact_phone">Phone number</string>
+    <string name="new_contact_save">Save</string>
+    <string name="new_contact_permission">Allow contacts access to save this contact.</string>
+    <string name="new_contact_failed">Couldn’t save the contact. Try again.</string>
+    <string name="contacts_selected_count">%d selected</string>
+    <string name="contacts_delete_selected">Delete selected contacts</string>
+    <string name="contacts_clear_selection">Clear selection</string>
+    <string name="contacts_delete_confirmation">Selected contacts will be removed from this device and its synced accounts.</string>
+    <string name="contacts_delete_failed">Couldn’t delete all selected contacts. Check contacts permissions or try again.</string>
+    <plurals name="contacts_delete_count">
+        <item quantity="one">Delete %d contact?</item>
+        <item quantity="other">Delete %d contacts?</item>
+    </plurals>
 </resources>

@@ -53,6 +53,8 @@ fun PreferencesScreen(
             onDefaultPage = viewModel::onDefaultPage,
             onThemeMode = viewModel::onThemeMode,
             leftHanded = settings.leftHanded,
+            circularLetterPreview = settings.circularLetterPreview,
+            onCircularLetterPreview = viewModel::onCircularLetterPreview,
             onLeftHanded = viewModel::onLeftHanded,
             onPhoneSetup = onPhoneSetup,
             accentRgb = settings.accentRgb,

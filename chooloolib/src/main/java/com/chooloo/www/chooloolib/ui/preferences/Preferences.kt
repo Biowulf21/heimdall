@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ViewList
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.BugReport
+import androidx.compose.material.icons.rounded.Circle
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Favorite
@@ -53,6 +54,13 @@ private enum class PreferenceItem(
         PreferenceSection.APPEARANCE,
         Icons.Rounded.SwapHoriz,
         R.string.pref_left_handed,
+        isDialerOnly = true,
+    ),
+    CIRCULAR_LETTER_PREVIEW(
+        PreferenceSection.APPEARANCE,
+        Icons.Rounded.Circle,
+        R.string.pref_circular_letter_preview,
+        R.string.pref_circular_letter_preview_description,
         isDialerOnly = true,
     ),
     PHONE_SETUP(
@@ -116,6 +124,8 @@ fun Preferences(
     onThemeMode: (ThemeMode) -> Unit,
     leftHanded: Boolean,
     onLeftHanded: (Boolean) -> Unit,
+    circularLetterPreview: Boolean,
+    onCircularLetterPreview: (Boolean) -> Unit,
     onPhoneSetup: (() -> Unit)?,
     accentRgb: Int,
     onAccentRgb: (Int) -> Unit,
@@ -170,6 +180,14 @@ fun Preferences(
                     title,
                     leftHanded,
                     onLeftHanded,
+                )
+
+                PreferenceItem.CIRCULAR_LETTER_PREVIEW -> SwitchPreferenceListItem(
+                    icon,
+                    title,
+                    circularLetterPreview,
+                    onCircularLetterPreview,
+                    subtitle = description,
                 )
 
                 PreferenceItem.PHONE_SETUP -> onPhoneSetup?.let {

@@ -31,9 +31,11 @@ fun SwitchPreferenceListItem(
     title: String,
     value: Boolean,
     onValueChange: (Boolean) -> Unit,
+    subtitle: String? = null,
 ) {
     ListItem(
         title = title,
+        subtitle = subtitle,
         modifier = Modifier.toggleable(
             value = value,
             role = Role.Switch,
