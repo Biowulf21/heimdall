@@ -1,62 +1,29 @@
 # Heimdall
 
-Heimdall is an Android dialer forked from [Chooloo/Koler](https://github.com/Chooloo/koler).
-It installs alongside Koler under the app ID `io.github.biowulf21.heimdall`.
-Install the signed APK on Android 10 or later and choose Heimdall when Android asks for the default phone app.
+Heimdall is an Android dialer based on [Koler](https://github.com/Chooloo/koler). It brings the dial pad, call history, and contacts together in a single app.
 
-Heimdall reads contacts and call history through Android's local providers. It includes no
-analytics or crash-reporting SDK and requests no internet access. Actions such as Message,
-Email, and Share open another app at your request.
+<img src="docs/screenshots/dial-pad.png" alt="Heimdall dial pad" width="240"> <img src="docs/screenshots/contacts.png" alt="Heimdall contacts" width="240"> <img src="docs/screenshots/settings.png" alt="Heimdall settings and support link" width="240">
 
-Source is available under the [GNU GPL v3](LICENSE). The build target is
-`./gradlew :koler:assembleRelease`. Sign the resulting release APK with your own key for sideloading.
+## Install and use
 
-## About upstream Koler
+Heimdall runs on Android 10 or later and installs alongside Koler under the app ID `io.github.biowulf21.heimdall`. Install a signed APK and choose **Heimdall** when Android asks for the default Phone app. You can also change this under **Settings → Apps → Default apps → Phone app**.
 
-Copylefted libre MVVM Android app. \
-Designed with the user in mind. \
-Believe us we want to make it good, we use it ourselves.
+Use the dial pad to enter a number. Open **Recents** to return a call or **Contacts** to find and edit entries. In Heimdall’s settings, you can choose a default screen, change the accent color, enable left-handed mode, and manage blocked numbers.
 
-## ☕ Support
-We, money, don't have.
-We, money, need.
-You, money, give.
-</br>
-You can donate with PayPal.
-[![Donate with PayPal](https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png)](https://paypal.me/theroeiedri?locale.x=en_US)
+## Privacy
 
-Or you can just buy the app from the Play store.
-You'll get constant updates without the need to get all the way here and download the release all by yourself and install the release all by yourself and then you realize you have a different package name so you contact me, but I really don't have time for this so I update it on Google Play and then you realize your installer doesn't work and then you realize your whole life is like this, miserable and not working but then you see a point of light in the distance so you run towards and and it's the "Buy" button in the Koler's page on Google Play, and your life is much improved.
+Heimdall uses Android’s local contacts and call history. It has no analytics or crash-reporting SDK and requests no internet permission. Links open in your browser. Calling and messaging actions use the Android services and apps you choose.
 
-## ⭐ Find this repository useful?
-Support it by joining [Stargazers](https://github.com/Chooloo/koler/stargazers) for this repository.
+## Build
 
-## 🏠 Join Telegram Group
-If you enjoy the app, wish to contribute or simply wish to be with like-minded people, come join us!!! It'll be fun :)
+Install JDK 21 and Android SDK 37, then run `./gradlew :koler:assembleRelease`. Gradle writes the APK under `koler/build/outputs/apk/release/`. Sign the APK before sideloading. To update an installation, use the same signing key as the installed build.
 
-<p align="center">
-  <a href="https://t.me/kolerOfficial">
-	<img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Join us on Telegram" height="60px">
-  </a>
-</p>
+## Support and credits
 
-## Translations
+[Buy me a coffee](https://buymeacoffee.com/biowulf21), or open **Settings → About → Donate** in Heimdall. Report fork-specific issues on this repository’s Issues page.
 
-<a href="https://hosted.weblate.org/engage/koler/">
-<img src="https://hosted.weblate.org/widgets/koler/-/multi-auto.svg" alt="Translation status" />
-</a>
-
-## 👍 Support Availability
-We are aware the app needs more support and updates, due to feature requests and minor bugs.
-We are currently not fully available for supporting the app due to a lack of support (seeing as the app is gratis).
-We'll do our best to slowly push updates and add the requested features.
-If you want to help us and support us so we can put more of our attention towards the app, please consider supporting us (at the bottom of the page).
-Feel free to contact us for every little thing.
-
-## ⚙️ Install
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Git it on F-Droid" height="80">](https://f-droid.org/app/com.chooloo.www.koler)
-[<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" alt="Get it on Google Play" height="80">](https://play.google.com/store/apps/details?id=com.chooloo.www.koler)
-[<img src="https://github.com/machiav3lli/oandbackupx/blob/034b226cea5c1b30eb4f6a6f313e4dadcbb0ece4/badge_github.png" alt="Get it on GitHub" height="80">](https://github.com/Chooloo/koler/releases)
+Heimdall builds on Chooloo’s [Koler](https://github.com/Chooloo/koler). You can also [support Koler directly](https://paypal.me/theroeiedri).
 
 ## License
-[![GNU GPLv3 Image](https://www.gnu.org/graphics/gplv3-127x51.png)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+
+[GNU General Public License v3 or later](LICENSE). See [NOTICE](NOTICE) for the original Koler copyright and license notice.

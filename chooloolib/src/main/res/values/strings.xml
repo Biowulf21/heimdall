@@ -4,8 +4,8 @@
     <!--region App & Config (non-translatable)-->
     <string name="app_name" translatable="false">Koler</string>
     <string name="support_email" translatable="false">choolookulu@gmail.com</string>
-    <string name="app_bug_reporting_url" translatable="false">https://github.com/Chooloo/call_manage/issues</string>
-    <string name="donation_link" translatable="false">https://www.paypal.com/paypalme/theroeiedri?locale.x=en_US</string>
+    <string name="app_bug_reporting_url" translatable="false">https://github.com/Biowulf21/heimdall-android/issues</string>
+    <string name="donation_link" translatable="false">https://buymeacoffee.com/biowulf21</string>
     <!--endregion-->
 
     <!--region Preference Keys (non-translatable)-->
