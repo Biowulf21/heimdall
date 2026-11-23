@@ -13,7 +13,6 @@ import com.chooloo.www.koler.domain.model.Call
 import com.chooloo.www.koler.domain.model.CallAudio
 import com.chooloo.www.koler.domain.usecase.GetCallsState
 import com.chooloo.www.koler.domain.usecase.GetPrimaryCall
-import com.chooloo.www.koler.domain.usecase.SetSpeaker
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -35,7 +34,6 @@ class CallViewModelTest {
             FakePreferenceRepository(),
             GetPrimaryCall(),
             GetCallsState(),
-            SetSpeaker(callRepository),
         )
     }
 
@@ -73,7 +71,7 @@ class CallViewModelTest {
     }
 
     @Test
-    fun `speaker toggles directly without bluetooth`() = runSubscribed {
+    fun `audio route picker opens without bluetooth`() = runSubscribed {
         callRepository.calls.value = listOf(activeCall())
         callRepository.audio.value =
             CallAudio(
@@ -83,7 +81,13 @@ class CallViewModelTest {
 
         viewModel.onCallActionClick(CallActionType.SPEAKER)
 
+        assertEquals(CallViewModel.Sheet.AUDIO_ROUTE, viewModel.uiState.value.sheet)
+        assertTrue(callRepository.actions.isEmpty())
+        viewModel.onAudioRouteSelected(AudioRoute.EARPIECE)
+        assertTrue(callRepository.actions.isEmpty())
+        viewModel.onAudioRouteSelected(AudioRoute.SPEAKER)
         assertEquals(listOf("route SPEAKER"), callRepository.actions)
+        assertEquals(AudioRoute.EARPIECE, viewModel.uiState.value.audio.route)
     }
 
     @Test
@@ -111,12 +115,12 @@ class CallViewModelTest {
     }
 
     @Test
-    fun `multiple calls show swap and merge instead of speaker`() = runSubscribed {
+    fun `multiple calls keep audio output alongside swap and merge`() = runSubscribed {
         callRepository.calls.value = listOf(activeCall("c1"), activeCall("c2", CallState.HOLDING))
 
         val types = viewModel.uiState.value.actions.map { it.type }
         assertTrue(CallActionType.SWAP in types && CallActionType.MERGE in types)
-        assertTrue(CallActionType.SPEAKER !in types)
+        assertTrue(CallActionType.SPEAKER in types)
     }
 
     @Test

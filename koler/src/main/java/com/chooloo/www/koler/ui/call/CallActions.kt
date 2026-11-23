@@ -13,11 +13,15 @@ import com.chooloo.www.chooloolib.ui.components.RoundAction
 import com.chooloo.www.chooloolib.ui.theme.Layout
 import com.chooloo.www.chooloolib.ui.theme.Sizes
 import com.chooloo.www.chooloolib.ui.theme.Spacing
+import com.chooloo.www.koler.R
+import com.chooloo.www.koler.domain.enum.AudioRoute
+import com.chooloo.www.koler.ui.common.CallLabels
 
 @Composable
 fun CallActions(
     actions: List<CallAction>,
     onActionClick: (CallActionType) -> Unit,
+    audioRoute: AudioRoute?,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -30,7 +34,13 @@ fun CallActions(
                 row.forEach { action ->
                     RoundAction(
                         icon = action.type.icon,
-                        label = stringResource(action.type.labelRes),
+                        label = stringResource(
+                            if (action.type == CallActionType.SPEAKER) {
+                                audioRoute?.let(CallLabels::labelRes) ?: R.string.call_audio_output
+                            } else {
+                                action.type.labelRes
+                            },
+                        ),
                         onClick = { onActionClick(action.type) },
                         isHighlighted = action.isActive,
                         enabled = action.isEnabled,

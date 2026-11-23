@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Heimdall</string>
+    <string name="call_audio_output">Audio output</string>
+    <string name="call_audio_route_unavailable">Couldn’t switch the call audio output</string>
+    <string name="incoming_swipe_hint">Swipe left to decline or right to answer</string>
+    <string name="incoming_decline">Decline</string>
+    <string name="incoming_answer">Answer</string>
 </resources>

@@ -155,7 +155,7 @@ fun MainScreen(viewModel: MainViewModel) {
             Tab.CONTACTS -> ContactsScreen(
                 viewModel = contactsViewModel,
                 selectedIds = selection.ids,
-                alphabetIndexOnLeft = leftHanded,
+                alphabetIndexOnLeft = leftHanded.takeUnless { uiState.isSearching },
                 circularLetterPreview = phoneSettings?.circularLetterPreview == true,
                 filter = uiState.searchText,
                 contentPadding = listPadding,

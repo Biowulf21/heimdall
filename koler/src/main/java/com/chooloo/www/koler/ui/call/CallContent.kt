@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.CallEnd
 import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +29,7 @@ import com.chooloo.www.chooloolib.ui.components.Avatar
 import com.chooloo.www.chooloolib.ui.components.FloatingBubble
 import com.chooloo.www.chooloolib.ui.theme.Sizes
 import com.chooloo.www.chooloolib.ui.theme.Spacing
+import com.chooloo.www.koler.domain.enum.AudioRoute
 import com.chooloo.www.koler.domain.enum.CallsState
 
 @Composable
@@ -40,6 +40,7 @@ fun CallContent(
     callerPhotoUri: String?,
     callsState: CallsState,
     actions: List<CallAction>,
+    audioRoute: AudioRoute?,
     onActionClick: (CallActionType) -> Unit,
     onAccept: () -> Unit,
     onHangup: () -> Unit,
@@ -49,7 +50,11 @@ fun CallContent(
         val header = @Composable { CallerHeader(callerName, avatarName, status, callerPhotoUri) }
         val buttons = @Composable {
             if (callsState.showsActions) {
-                CallActions(actions = actions, onActionClick = onActionClick)
+                CallActions(
+                    actions = actions,
+                    onActionClick = onActionClick,
+                    audioRoute = audioRoute,
+                )
             }
             if (!callsState.isEnded) CallControls(callsState, onAccept, onHangup, onManage)
         }
@@ -116,6 +121,10 @@ private fun CallControls(
     onHangup: () -> Unit,
     onManage: () -> Unit,
 ) {
+    if (callsState == CallsState.INCOMING) {
+        IncomingCallSwipe(onAccept = onAccept, onDecline = onHangup)
+        return
+    }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.ExtraLarge),
@@ -136,16 +145,6 @@ private fun CallControls(
             containerColor = MaterialTheme.colorScheme.errorContainer,
             contentColor = MaterialTheme.colorScheme.onErrorContainer,
         )
-        if (callsState == CallsState.INCOMING) {
-            FloatingBubble(
-                icon = Icons.Rounded.Call,
-                contentDescription = stringResource(R.string.cd_accept_call),
-                onClick = onAccept,
-                size = Sizes.ButtonLarge,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            )
-        }
     }
 }
 

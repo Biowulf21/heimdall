@@ -69,7 +69,8 @@ class CallMapper @Inject constructor(private val telecomManager: TelecomManager)
         isMuted = audioState.isMuted,
         route = AudioRoute.entries.firstOrNull { toTelecomRoute(it) == audioState.route },
         supportedRoutes = AudioRoute.entries.filter {
-            audioState.supportedRouteMask and toTelecomRoute(it) == toTelecomRoute(it)
+            it != AudioRoute.WIRED_OR_EARPIECE &&
+                audioState.supportedRouteMask and toTelecomRoute(it) == toTelecomRoute(it)
         },
     )
 

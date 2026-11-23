@@ -1,10 +1,16 @@
 package com.chooloo.www.koler.data.repository
 
 import android.os.Build
+import android.os.OutcomeReceiver
 import android.telecom.Call as TelecomCall
 import android.telecom.CallAudioState
+import android.telecom.CallEndpoint
+import android.telecom.CallEndpointException
 import android.telecom.InCallService
 import android.util.Log
+import android.widget.Toast
+import androidx.annotation.RequiresApi
+import com.chooloo.www.koler.R
 import com.chooloo.www.koler.data.mapper.CallMapper
 import com.chooloo.www.koler.domain.enum.AudioRoute
 import com.chooloo.www.koler.domain.model.Call
@@ -21,6 +27,8 @@ import kotlinx.coroutines.flow.asStateFlow
 class CallRepositoryImpl @Inject constructor(private val callMapper: CallMapper) :
     CallRepository {
     private var service: InCallService? = null
+    private var endpoints = emptyList<CallEndpoint>()
+    private var endpointReceived = false
     private var nextCallId = 0
     private val telecomCalls = LinkedHashMap<String, TelecomCall>()
     private val callIds = IdentityHashMap<TelecomCall, String>()
@@ -91,7 +99,40 @@ class CallRepositoryImpl @Inject constructor(private val callMapper: CallMapper)
     override fun setMuted(isMuted: Boolean) = withService { setMuted(isMuted) }
 
     override fun setAudioRoute(route: AudioRoute) = withService {
-        setAudioRoute(callMapper.toTelecomRoute(route))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            val endpoint = if (route == AudioRoute.WIRED_OR_EARPIECE) {
+                endpoints.firstOrNull { endpointRoute(it.endpointType) == AudioRoute.WIRED_HEADSET }
+                    ?: endpoints.firstOrNull {
+                        endpointRoute(it.endpointType) == AudioRoute.EARPIECE
+                    }
+            } else {
+                endpoints.firstOrNull { endpointRoute(it.endpointType) == route }
+            }
+            if (endpoint == null) {
+                Toast.makeText(
+                    this,
+                    R.string.call_audio_route_unavailable,
+                    Toast.LENGTH_SHORT,
+                ).show()
+                return@withService
+            }
+            requestCallEndpointChange(
+                endpoint,
+                mainExecutor,
+                object : OutcomeReceiver<Void, CallEndpointException> {
+                    override fun onResult(result: Void?) = Unit
+                    override fun onError(error: CallEndpointException) {
+                        Toast.makeText(
+                            this@withService,
+                            R.string.call_audio_route_unavailable,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                },
+            )
+        } else {
+            setAudioRoute(callMapper.toTelecomRoute(route))
+        }
     }
 
     fun onServiceCreated(service: InCallService) {
@@ -101,6 +142,8 @@ class CallRepositoryImpl @Inject constructor(private val callMapper: CallMapper)
     fun onServiceDestroyed(service: InCallService) {
         if (this.service !== service) return
         this.service = null
+        endpoints = emptyList()
+        endpointReceived = false
         callIds.keys.forEach { it.unregisterCallback(callCallback) }
         telecomCalls.clear()
         callIds.clear()
@@ -135,7 +178,38 @@ class CallRepositoryImpl @Inject constructor(private val callMapper: CallMapper)
     }
 
     fun onAudioStateChanged(audioState: CallAudioState) {
-        _audio.value = callMapper.toCallAudio(audioState)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            _audio.value = callMapper.toCallAudio(audioState)
+        } else {
+            _audio.value = _audio.value.copy(
+                isMuted = audioState.isMuted,
+                route = if (endpointReceived) {
+                    _audio.value.route
+                } else {
+                    callMapper.toCallAudio(
+                        audioState,
+                    ).route
+                },
+            )
+        }
+    }
+
+    @RequiresApi(34)
+    fun onEndpointChanged(endpoint: CallEndpoint) {
+        endpointReceived = true
+        _audio.value = _audio.value.copy(route = endpointRoute(endpoint.endpointType))
+    }
+
+    @RequiresApi(34)
+    fun onEndpointsChanged(available: List<CallEndpoint>) {
+        endpoints = available.toList()
+        _audio.value = _audio.value.copy(
+            supportedRoutes = available.mapNotNull { endpointRoute(it.endpointType) }.distinct(),
+        )
+    }
+
+    fun onMuteStateChanged(isMuted: Boolean) {
+        _audio.value = _audio.value.copy(isMuted = isMuted)
     }
 
     private fun publishCalls() {
@@ -163,4 +237,12 @@ class CallRepositoryImpl @Inject constructor(private val callMapper: CallMapper)
     private companion object {
         const val TAG = "CallRepository"
     }
+}
+
+internal fun endpointRoute(type: Int): AudioRoute? = when (type) {
+    CallEndpoint.TYPE_EARPIECE -> AudioRoute.EARPIECE
+    CallEndpoint.TYPE_SPEAKER -> AudioRoute.SPEAKER
+    CallEndpoint.TYPE_BLUETOOTH -> AudioRoute.BLUETOOTH
+    CallEndpoint.TYPE_WIRED_HEADSET -> AudioRoute.WIRED_HEADSET
+    else -> null
 }

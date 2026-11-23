@@ -120,6 +120,7 @@ internal fun ContactProfileScreen(
         ?: stringResource(SharedR.string.caller_unknown)
     val contact = state.contact
     val phones = state.details.phones.filter { it.number.isNotBlank() }
+        .distinctBy { phoneFormattingKey(it.number) }
     val phoneNumbers = phones.map {
         it.number
     }.ifEmpty { listOfNotNull(state.number?.takeIf(String::isNotBlank)) }
@@ -336,13 +337,8 @@ internal fun ContactProfileScreen(
                                 title = recent.number,
                                 subtitle = listOfNotNull(date, duration).joinToString(" · "),
                                 icon = Icons.Rounded.Call,
-                                onClick = { copy(recent.number) },
-                                end = {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        RecentTypeIcon(recent.type, contentDescription = null)
-                                        CopyNumberButton { copy(recent.number) }
-                                    }
-                                },
+                                onClick = null,
+                                end = { RecentTypeIcon(recent.type, contentDescription = null) },
                             )
                         }
                     }
@@ -627,3 +623,6 @@ private fun CopyNumberButton(onClick: () -> Unit) {
         Icon(Icons.Rounded.ContentCopy, stringResource(R.string.contact_copy_number))
     }
 }
+
+internal fun phoneFormattingKey(number: String): String =
+    number.filterNot { it.isWhitespace() || it in "-.()" }.ifEmpty { number }

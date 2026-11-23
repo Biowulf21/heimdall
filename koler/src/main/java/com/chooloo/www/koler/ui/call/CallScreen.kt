@@ -1,6 +1,8 @@
 package com.chooloo.www.koler.ui.call
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
@@ -15,6 +17,7 @@ import com.chooloo.www.chooloolib.ui.components.list.ItemList
 import com.chooloo.www.chooloolib.ui.components.list.ListItem
 import com.chooloo.www.chooloolib.ui.components.list.RadioListItem
 import com.chooloo.www.chooloolib.ui.dialpad.DialpadScreen
+import com.chooloo.www.koler.R as AppR
 import com.chooloo.www.koler.domain.enum.CallsState
 import com.chooloo.www.koler.ui.call.CallViewModel.Sheet
 import com.chooloo.www.koler.ui.common.CallLabels
@@ -61,18 +64,24 @@ fun CallScreen(callViewModel: CallViewModel = hiltViewModel(), leftHanded: Boole
         visible = uiState.sheet == Sheet.AUDIO_ROUTE,
         onDismiss = callViewModel::onSheetDismiss,
     ) {
-        ItemList(
-            items = uiState.audio.supportedRoutes,
-            key = { it.name },
-            item = { route ->
-                RadioListItem(
-                    title = stringResource(CallLabels.labelRes(route)),
-                    isSelected = route == uiState.audio.route,
-                ) {
-                    callViewModel.onAudioRouteSelected(route)
-                }
-            },
-        )
+        Column {
+            Text(
+                stringResource(AppR.string.call_audio_output),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            ItemList(
+                items = uiState.audio.supportedRoutes,
+                key = { it.name },
+                item = { route ->
+                    RadioListItem(
+                        title = stringResource(CallLabels.labelRes(route)),
+                        isSelected = route == uiState.audio.route,
+                    ) {
+                        callViewModel.onAudioRouteSelected(route)
+                    }
+                },
+            )
+        }
     }
 
     BottomSheet(
@@ -102,6 +111,7 @@ fun CallScreen(callViewModel: CallViewModel = hiltViewModel(), leftHanded: Boole
         callerPhotoUri = caller?.photoUri,
         callsState = uiState.callsState,
         actions = uiState.actions,
+        audioRoute = uiState.audio.route,
         onActionClick = callViewModel::onCallActionClick,
         onAccept = callViewModel::onAccept,
         onHangup = callViewModel::onHangup,

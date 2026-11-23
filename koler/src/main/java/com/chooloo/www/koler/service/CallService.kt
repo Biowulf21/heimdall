@@ -3,12 +3,15 @@ package com.chooloo.www.koler.service
 import android.app.KeyguardManager
 import android.app.NotificationManager
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.telecom.Call
 import android.telecom.CallAudioState
+import android.telecom.CallEndpoint
 import android.telecom.InCallService
 import android.telecom.TelecomManager
+import androidx.annotation.RequiresApi
 import com.chooloo.www.koler.data.repository.CallRepositoryImpl
 import com.chooloo.www.koler.device.ProximityScreenLock
 import com.chooloo.www.koler.domain.enum.CallState
@@ -49,6 +52,9 @@ class CallService : InCallService() {
 
     override fun onCallAdded(call: Call) {
         super.onCallAdded(call)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            currentCallEndpoint?.let(callRepository::onEndpointChanged)
+        }
         val addedCall = callRepository.onCallAdded(call)
         // The framework reports only changes from its own starting value, so read the current value.
         callRepository.onCanAddCallChanged(canAddCall())
@@ -72,6 +78,21 @@ class CallService : InCallService() {
     override fun onCallAudioStateChanged(audioState: CallAudioState) {
         super.onCallAudioStateChanged(audioState)
         callRepository.onAudioStateChanged(audioState)
+    }
+
+    @RequiresApi(34)
+    override fun onCallEndpointChanged(callEndpoint: CallEndpoint) {
+        callRepository.onEndpointChanged(callEndpoint)
+    }
+
+    @RequiresApi(34)
+    override fun onAvailableCallEndpointsChanged(availableEndpoints: List<CallEndpoint>) {
+        callRepository.onEndpointsChanged(availableEndpoints)
+    }
+
+    @RequiresApi(34)
+    override fun onMuteStateChanged(isMuted: Boolean) {
+        callRepository.onMuteStateChanged(isMuted)
     }
 
     override fun onBringToForeground(showDialpad: Boolean) {

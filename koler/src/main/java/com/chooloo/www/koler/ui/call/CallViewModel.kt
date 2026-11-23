@@ -16,7 +16,6 @@ import com.chooloo.www.koler.domain.model.PhoneAccount
 import com.chooloo.www.koler.domain.repository.CallRepository
 import com.chooloo.www.koler.domain.usecase.GetCallsState
 import com.chooloo.www.koler.domain.usecase.GetPrimaryCall
-import com.chooloo.www.koler.domain.usecase.SetSpeaker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,7 +45,6 @@ class CallViewModel @Inject constructor(
     private val preferenceRepository: PreferenceRepository,
     private val getPrimaryCall: GetPrimaryCall,
     private val getCallsState: GetCallsState,
-    private val setSpeaker: SetSpeaker,
 ) : ViewModel() {
     enum class Sheet { KEYPAD, ADD_CALL, MANAGE, AUDIO_ROUTE }
 
@@ -138,11 +136,7 @@ class CallViewModel @Inject constructor(
 
             CallActionType.ADD_CALL -> showSheet(Sheet.ADD_CALL)
 
-            CallActionType.SPEAKER -> if (AudioRoute.BLUETOOTH in state.audio.supportedRoutes) {
-                showSheet(Sheet.AUDIO_ROUTE)
-            } else {
-                setSpeaker(state.audio.route != AudioRoute.SPEAKER)
-            }
+            CallActionType.SPEAKER -> showSheet(Sheet.AUDIO_ROUTE)
         }
     }
 
@@ -179,7 +173,7 @@ class CallViewModel @Inject constructor(
     }
 
     fun onAudioRouteSelected(route: AudioRoute) {
-        callRepository.setAudioRoute(route)
+        if (route != uiState.value.audio.route) callRepository.setAudioRoute(route)
         onSheetDismiss()
     }
 
@@ -211,6 +205,12 @@ class CallViewModel @Inject constructor(
 
     private fun showSheet(sheet: Sheet) = localState.update { it.copy(sheet = sheet) }
 
+    private fun audioRouteAction(audio: CallAudio) = CallAction(
+        CallActionType.SPEAKER,
+        isEnabled = audio.supportedRoutes.isNotEmpty(),
+        isActive = audio.route == AudioRoute.SPEAKER,
+    )
+
     private fun actions(
         state: CallsState,
         call: Call?,
@@ -236,13 +236,9 @@ class CallViewModel @Inject constructor(
             listOf(
                 CallAction(CallActionType.SWAP, isEnabled = call.can(CallCapability.SWAP)),
                 CallAction(CallActionType.MERGE, isEnabled = call.can(CallCapability.MERGE)),
-            ) + common
+            ) + common + audioRouteAction(audio)
         } else {
-            common + CallAction(
-                CallActionType.SPEAKER,
-                isEnabled = true,
-                isActive = audio.route == AudioRoute.SPEAKER,
-            )
+            common + audioRouteAction(audio)
         }
     }
 }
