@@ -40,7 +40,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -73,6 +75,7 @@ internal fun AlphabetIndex(
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
     var dragIndex by remember { mutableStateOf<Int?>(null) }
     var draggingRail by remember { mutableStateOf(false) }
     val interacting = listState.isScrollInProgress || dragIndex != null
@@ -139,6 +142,9 @@ internal fun AlphabetIndex(
                             dragIndex = target
                             if (target != previous) {
                                 previous = target
+                                haptics.performHapticFeedback(
+                                    HapticFeedbackType.SegmentFrequentTick,
+                                )
                                 pending?.cancel()
                                 pending = scope.launch {
                                     listState.scrollToItem(sections[target].value)

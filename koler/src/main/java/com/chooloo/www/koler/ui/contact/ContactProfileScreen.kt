@@ -80,6 +80,7 @@ import com.chooloo.www.chooloolib.ui.caller.CallerTarget
 import com.chooloo.www.chooloolib.ui.caller.CallerViewModel
 import com.chooloo.www.chooloolib.ui.common.LoadingState
 import com.chooloo.www.chooloolib.ui.common.rememberExternalActions
+import com.chooloo.www.chooloolib.ui.common.rememberPhoneFormatter
 import com.chooloo.www.chooloolib.ui.components.Avatar
 import com.chooloo.www.chooloolib.ui.components.ConfirmDialog
 import com.chooloo.www.chooloolib.ui.components.Empty
@@ -110,13 +111,14 @@ internal fun ContactProfileScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val external = rememberExternalActions()
+    val formatNumber = rememberPhoneFormatter()
     val callGate = rememberHeimdallCallGate()
     val callNumber: (String) -> Unit = { number -> callGate(number) { viewModel.onCall(number) } }
     val actions = remember(context) { ContactProfileActions(context) }
     val list = rememberLazyListState()
     val collapsed by remember { derivedStateOf { list.firstVisibleItemIndex > 0 } }
     val title = state.name?.takeIf(String::isNotBlank)
-        ?: state.number?.takeIf(String::isNotBlank)
+        ?: state.number?.takeIf(String::isNotBlank)?.let(formatNumber)
         ?: stringResource(SharedR.string.caller_unknown)
     val contact = state.contact
     val phones = state.details.phones.filter { it.number.isNotBlank() }
@@ -296,7 +298,7 @@ internal fun ContactProfileScreen(
                         items(phoneNumbers, key = { it }) { number ->
                             val phone = phones.firstOrNull { it.number == number }
                             ProfileRow(
-                                title = number,
+                                title = formatNumber(number),
                                 subtitle = phone?.let {
                                     Phone.getTypeLabel(
                                         context.resources,
@@ -334,7 +336,7 @@ internal fun ContactProfileScreen(
                                 it > 0
                             }?.let(DateUtils::formatElapsedTime)
                             ProfileRow(
-                                title = recent.number,
+                                title = formatNumber(recent.number),
                                 subtitle = listOfNotNull(date, duration).joinToString(" · "),
                                 icon = Icons.Rounded.Call,
                                 onClick = null,

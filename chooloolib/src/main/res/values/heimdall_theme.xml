@@ -26,6 +26,15 @@
     <string name="new_contact_save">Save</string>
     <string name="new_contact_permission">Allow contacts access to save this contact.</string>
     <string name="new_contact_failed">Couldn’t save the contact. Try again.</string>
+    <string name="contact_editor_invalid_phone">Enter a valid phone number</string>
+    <string name="contact_editor_invalid_email">Enter a valid email address</string>
+    <string name="contact_editor_empty">Add a name or number</string>
+    <string name="contact_editor_add_photo">Add photo</string>
+    <string name="contact_editor_change_photo">Change photo</string>
+    <string name="contact_editor_remove_photo">Remove photo</string>
+    <string name="contact_editor_discard_title">Discard changes?</string>
+    <string name="contact_editor_discard_text">Your edits to this contact won’t be saved.</string>
+    <string name="contact_editor_discard">Discard</string>
     <string name="contacts_selected_count">%d selected</string>
     <string name="contacts_delete_selected">Delete selected contacts</string>
     <string name="contacts_clear_selection">Clear selection</string>

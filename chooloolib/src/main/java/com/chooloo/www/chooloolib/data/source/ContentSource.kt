@@ -2,6 +2,7 @@ package com.chooloo.www.chooloolib.data.source
 
 import android.content.ContentResolver
 import android.database.ContentObserver
+import android.net.Uri
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -24,13 +25,19 @@ class ContentSource @Inject constructor(private val contentResolver: ContentReso
         }
     }
 
-    fun <T> observeAll(query: ContentQuery, map: (CursorRow) -> T): Flow<List<T>> = callbackFlow {
+    fun <T> observeAll(
+        query: ContentQuery,
+        alsoObserve: List<Uri> = emptyList(),
+        map: (CursorRow) -> T,
+    ): Flow<List<T>> = callbackFlow {
         val observer = object : ContentObserver(null) {
             override fun onChange(selfChange: Boolean) {
                 trySend(Unit)
             }
         }
-        contentResolver.registerContentObserver(query.uri, true, observer)
+        (listOf(query.uri) + alsoObserve).forEach {
+            contentResolver.registerContentObserver(it, true, observer)
+        }
         trySend(Unit)
         awaitClose { contentResolver.unregisterContentObserver(observer) }
     }.conflate().map { queryAll(query, map) }

@@ -18,6 +18,19 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
+/** Keeps only what a dialer can dial: digits, * and #, and a + at the very start. */
+internal fun dialable(text: String): String {
+    // Other scripts' digits (e.g. full-width ０１２) become plain 0-9.
+    val kept = text.mapNotNull {
+        when {
+            it.isDigit() -> it.digitToInt().digitToChar()
+            it in "+*#" -> it
+            else -> null
+        }
+    }.joinToString("")
+    return kept.take(1) + kept.drop(1).filter { it != '+' }
+}
+
 @HiltViewModel
 class DialpadViewModel @Inject constructor(
     private val audioRepository: AudioRepository,
@@ -32,6 +45,10 @@ class DialpadViewModel @Inject constructor(
 
     fun setNumber(number: String) {
         _uiState.update { it.copy(value = number.filter { it.isDigit() || it in "+#*" }) }
+    }
+
+    fun onPaste(text: String) {
+        _uiState.update { it.copy(value = dialable(it.value + text)) }
     }
 
     fun onCallClick() {

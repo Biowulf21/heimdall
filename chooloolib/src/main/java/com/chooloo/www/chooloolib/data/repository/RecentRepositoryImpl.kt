@@ -5,6 +5,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.provider.CallLog.Calls
+import android.provider.ContactsContract
 import android.telephony.PhoneNumberUtils
 import android.util.Log
 import androidx.core.content.contentValuesOf
@@ -112,6 +113,8 @@ class RecentRepositoryImpl @Inject constructor(
                 selectionArgs = selectionArgs,
                 sortOrder = "${Calls.DATE} DESC",
             ),
+            // Saved or edited contacts change the names recents show, but not the call log.
+            alsoObserve = listOf(ContactsContract.AUTHORITY_URI),
         ) { row ->
             Recent(
                 id = row.long(Calls._ID),

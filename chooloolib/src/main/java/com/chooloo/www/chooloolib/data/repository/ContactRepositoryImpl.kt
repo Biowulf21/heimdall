@@ -47,7 +47,7 @@ class ContactRepositoryImpl @Inject constructor(
             selection = "${Contacts.DISPLAY_NAME_PRIMARY} IS NOT NULL",
             sortOrder = "${Contacts.SORT_KEY_PRIMARY} ASC",
         ),
-        ::toContact,
+        map = ::toContact,
     )
         .map { contacts ->
             val numbers = primaryNumbers()
@@ -86,7 +86,7 @@ class ContactRepositoryImpl @Inject constructor(
             uri = ContentUris.withAppendedId(Contacts.CONTENT_URI, contactId),
             projection = PROJECTION,
         ),
-        ::toContact,
+        map = ::toContact,
     )
         .map { contacts ->
             contacts.firstOrNull()?.let { it.copy(number = primaryNumbers(contactId)[it.id]) }

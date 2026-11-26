@@ -1,6 +1,7 @@
 package com.chooloo.www.koler.ui.call
 
 import android.text.format.DateUtils
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -20,10 +21,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.chooloo.www.chooloolib.R
 import com.chooloo.www.chooloolib.ui.components.Avatar
 import com.chooloo.www.chooloolib.ui.components.FloatingBubble
@@ -34,6 +42,72 @@ import com.chooloo.www.koler.domain.enum.CallsState
 
 @Composable
 fun CallContent(
+    callerName: String,
+    avatarName: String?,
+    status: String?,
+    callerPhotoUri: String?,
+    callsState: CallsState,
+    actions: List<CallAction>,
+    audioRoute: AudioRoute?,
+    onActionClick: (CallActionType) -> Unit,
+    onAccept: () -> Unit,
+    onHangup: () -> Unit,
+    onManage: () -> Unit,
+) {
+    val layout = @Composable {
+        CallLayout(
+            callerName,
+            avatarName,
+            status,
+            callerPhotoUri,
+            callsState,
+            actions,
+            audioRoute,
+            onActionClick,
+            onAccept,
+            onHangup,
+            onManage,
+        )
+    }
+    Box(Modifier.fillMaxSize()) {
+        if (callerPhotoUri == null) {
+            layout()
+        } else {
+            PhotoBackground(callerPhotoUri)
+            // Text and icons sit on a dark scrim, so they switch to light tones.
+            val scheme = MaterialTheme.colorScheme.copy(
+                onBackground = Color.White,
+                onSurface = Color.White,
+                onSurfaceVariant = Color.White.copy(alpha = 0.8f),
+            )
+            MaterialTheme(colorScheme = scheme, content = layout)
+        }
+    }
+}
+
+@Composable
+private fun PhotoBackground(photoUri: String) {
+    Box(Modifier.fillMaxSize()) {
+        AsyncImage(
+            model = ImageRequest.Builder(
+                LocalContext.current,
+            ).data(photoUri).crossfade(300).build(),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
+        Box(
+            Modifier.fillMaxSize().background(
+                Brush.verticalGradient(
+                    listOf(Color.Black.copy(alpha = 0.55f), Color.Black.copy(alpha = 0.8f)),
+                ),
+            ),
+        )
+    }
+}
+
+@Composable
+private fun CallLayout(
     callerName: String,
     avatarName: String?,
     status: String?,

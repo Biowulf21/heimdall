@@ -1,5 +1,7 @@
 package com.chooloo.www.chooloolib.ui.components.list
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.material3.ListItem as MaterialListItem
 import androidx.compose.material3.ListItemDefaults
@@ -21,9 +23,18 @@ fun ListItem(
     onLongClick: (() -> Unit)? = null,
     startContainer: @Composable (() -> Unit)? = null,
     endContainer: @Composable (() -> Unit)? = null,
+    animateTitle: Boolean = false,
 ) {
     MaterialListItem(
-        headlineContent = { Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        headlineContent = {
+            if (animateTitle) {
+                Crossfade(targetState = title, animationSpec = tween(180), label = "Title") {
+                    Text(text = it, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            } else {
+                Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+        },
         supportingContent = subtitle?.let {
             { Text(text = it, maxLines = 1, overflow = TextOverflow.Ellipsis) }
         },

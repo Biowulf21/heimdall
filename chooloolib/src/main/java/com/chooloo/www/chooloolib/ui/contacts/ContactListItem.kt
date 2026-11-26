@@ -13,6 +13,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import com.chooloo.www.chooloolib.R
 import com.chooloo.www.chooloolib.domain.model.Contact
+import com.chooloo.www.chooloolib.ui.common.rememberPhoneFormatter
 import com.chooloo.www.chooloolib.ui.components.Avatar
 import com.chooloo.www.chooloolib.ui.components.list.ListItem
 import com.chooloo.www.chooloolib.ui.theme.Sizes
@@ -34,7 +35,7 @@ fun ContactListItem(
                 Modifier
             },
         ),
-        subtitle = contact.number,
+        subtitle = contact.number?.let(rememberPhoneFormatter()),
         title = contact.name ?: stringResource(id = R.string.contact_unknown_name),
         onClick = onClick,
         onLongClick = onLongClick,

@@ -49,6 +49,7 @@ fun Dialpad(
     onKeyLongClick: ((key: Char) -> Unit)?,
     leftHanded: Boolean = false,
     suggestions: (@Composable () -> Unit)? = null,
+    onPaste: ((String) -> Unit)? = null,
 ) {
     val addContactOnStart = leftHanded == (LocalLayoutDirection.current == LayoutDirection.Rtl)
     BoxWithConstraints(modifier.fillMaxSize()) {
@@ -97,7 +98,12 @@ fun Dialpad(
                             onDeleteClick,
                             onDeleteLongClick,
                         )
-                        DialpadNumber(value, Modifier.weight(1f), verticalPadding = 0.dp)
+                        DialpadNumber(
+                            value,
+                            Modifier.weight(1f),
+                            verticalPadding = 0.dp,
+                            onPaste = onPaste,
+                        )
                         SideButton(
                             !addContactOnStart,
                             value.isNotEmpty(),

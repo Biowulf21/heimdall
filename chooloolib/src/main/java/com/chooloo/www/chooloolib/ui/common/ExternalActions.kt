@@ -27,10 +27,14 @@ fun rememberExternalActions(): ExternalActions {
     var newContactNumber by rememberSaveable { mutableStateOf<String?>(null) }
     var editingContactId by rememberSaveable { mutableStateOf<Long?>(null) }
     if (newContactNumber != null || editingContactId != null) {
-        ContactEditorDialog(newContactNumber.orEmpty(), editingContactId) {
-            newContactNumber = null
-            editingContactId = null
-        }
+        ContactEditorDialog(
+            contactId = editingContactId,
+            prefill = mapOf(ContactFieldKind.PHONE to listOfNotNull(newContactNumber)),
+            onClose = {
+                newContactNumber = null
+                editingContactId = null
+            },
+        )
     }
     return remember(context) {
         ExternalActions(context, { newContactNumber = it }, { editingContactId = it })

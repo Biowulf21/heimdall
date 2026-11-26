@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import com.chooloo.www.chooloolib.R
 import com.chooloo.www.chooloolib.domain.model.RecentGroup
 import com.chooloo.www.chooloolib.ui.common.Labels
+import com.chooloo.www.chooloolib.ui.common.rememberPhoneFormatter
 import com.chooloo.www.chooloolib.ui.components.Avatar
 import com.chooloo.www.chooloolib.ui.components.list.ListItem
 import com.chooloo.www.chooloolib.ui.theme.Sizes
@@ -38,9 +39,12 @@ fun RecentListItem(
         subtitle = subtitle,
         title = recent.name
             ?: Labels.fallbackNameRes(recent.presentation)?.let { stringResource(it) }
-            ?: recent.number.ifEmpty { stringResource(R.string.caller_unknown) },
+            ?: recent.number.ifEmpty { stringResource(R.string.caller_unknown) }
+                .let(rememberPhoneFormatter()),
         onClick = onClick,
         onLongClick = onLongClick,
+        // Rows are keyed by call id, so this only fires when a number gains a contact name.
+        animateTitle = true,
         startContainer = {
             Avatar(name = recent.name, photoUri = recent.photoUri, size = Sizes.AvatarSmall)
         },

@@ -55,6 +55,7 @@ fun DialpadScreen(
                 }
             },
             leftHanded = leftHanded,
+            onPaste = dialpadViewModel::onPaste,
             suggestions = suggestions?.let { content ->
                 {
                     content(value) { number ->

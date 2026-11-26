@@ -44,6 +44,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.chooloo.www.chooloolib.domain.repository.ContactRepository
+import com.chooloo.www.chooloolib.ui.common.rememberPhoneFormatter
 import com.chooloo.www.chooloolib.ui.components.Avatar
 import com.chooloo.www.koler.R
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -148,7 +149,7 @@ internal fun DialpadMatches(
                 LazyColumn(Modifier.heightIn(max = 260.dp)) {
                     items(result.numbers) { number ->
                         ListItem(
-                            headlineContent = { Text(number) },
+                            headlineContent = { Text(rememberPhoneFormatter()(number)) },
                             modifier = Modifier.clickable {
                                 choosing = null
                                 onCall(number)
