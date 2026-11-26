@@ -64,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -517,6 +518,14 @@ private fun ContactField(
     }
     val requester = remember { FocusRequester() }
     val formatPhone = rememberPhoneFormatter()
+    val countryIso = rememberPhoneCountryIso()
+    var focused by remember { mutableStateOf(false) }
+    // A hint, not an error: shown once the user leaves the field, and saving still works.
+    val hint = R.string.contact_editor_phone_incomplete.takeIf {
+        kind == ContactFieldKind.PHONE && !focused && value.isNotBlank() &&
+            !looksLikeCompleteNumber(value, countryIso)
+    }
+    val message = error ?: hint
     val transformation = remember(kind, formatPhone) {
         if (kind ==
             ContactFieldKind.PHONE
@@ -535,11 +544,22 @@ private fun ContactField(
     Column {
         OutlinedTextField(
             value = value,
-            onValueChange = onChange,
+            onValueChange = {
+                if (kind ==
+                    ContactFieldKind.PHONE
+                ) {
+                    onChange(capPhoneDigits(it))
+                } else {
+                    onChange(it)
+                }
+            },
             label = { Text(stringResource(kind.label)) },
             supportingText = field.typeLabel?.let { { Text(it) } },
             isError = error != null,
-            modifier = Modifier.fillMaxWidth().focusRequester(requester),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(requester)
+                .onFocusChanged { focused = it.isFocused },
             enabled = enabled,
             singleLine = true,
             shape = MaterialTheme.shapes.medium,
@@ -548,10 +568,10 @@ private fun ContactField(
             visualTransformation = transformation,
         )
         // Keeps the last message while the exit animation runs.
-        var shown by remember { mutableStateOf(error) }
-        if (error != null) shown = error
+        var shown by remember { mutableStateOf(message) }
+        if (message != null) shown = message
         AnimatedVisibility(
-            visible = error != null,
+            visible = message != null,
             enter = fadeIn(tween(150)) +
                 expandVertically(tween(180, easing = FastOutSlowInEasing)),
             exit = fadeOut(tween(100)) + shrinkVertically(tween(150)),
@@ -559,7 +579,11 @@ private fun ContactField(
             shown?.let {
                 Text(
                     stringResource(it),
-                    color = MaterialTheme.colorScheme.error,
+                    color = if (shown == error) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier
                         .padding(start = Spacing.Medium, top = Spacing.ExtraSmall)

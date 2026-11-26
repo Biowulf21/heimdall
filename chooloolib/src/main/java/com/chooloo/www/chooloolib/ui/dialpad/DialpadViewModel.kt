@@ -7,7 +7,9 @@ import com.chooloo.www.chooloolib.domain.repository.AudioRepository
 import com.chooloo.www.chooloolib.domain.repository.PreferenceRepository
 import com.chooloo.www.chooloolib.domain.repository.RecentRepository
 import com.chooloo.www.chooloolib.domain.repository.TelecomRepository
+import com.chooloo.www.chooloolib.ui.common.MAX_PHONE_DIGITS
 import com.chooloo.www.chooloolib.ui.common.UserMessage
+import com.chooloo.www.chooloolib.ui.common.capPhoneDigits
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,11 +46,13 @@ class DialpadViewModel @Inject constructor(
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     fun setNumber(number: String) {
-        _uiState.update { it.copy(value = number.filter { it.isDigit() || it in "+#*" }) }
+        _uiState.update {
+            it.copy(value = capPhoneDigits(number.filter { it.isDigit() || it in "+#*" }))
+        }
     }
 
     fun onPaste(text: String) {
-        _uiState.update { it.copy(value = dialable(it.value + text)) }
+        _uiState.update { it.copy(value = capPhoneDigits(dialable(it.value + text))) }
     }
 
     fun onCallClick() {
@@ -73,6 +77,8 @@ class DialpadViewModel @Inject constructor(
     }
 
     fun onKeyClick(key: Char) {
+        // A 16th digit can't be part of any phone number, so the key does nothing.
+        if (key.isDigit() && _uiState.value.value.count(Char::isDigit) >= MAX_PHONE_DIGITS) return
         viewModelScope.launch {
             val settings = preferenceRepository.settings.first()
             if (settings.isDialpadTonesEnabled) audioRepository.playTone(key)

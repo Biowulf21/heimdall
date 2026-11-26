@@ -28,6 +28,7 @@
     <string name="new_contact_failed">Couldn’t save the contact. Try again.</string>
     <string name="contact_editor_invalid_phone">Enter a valid phone number</string>
     <string name="contact_editor_invalid_email">Enter a valid email address</string>
+    <string name="contact_editor_phone_incomplete">This doesn’t look like a complete number. You can still save it.</string>
     <string name="contact_editor_empty">Add a name or number</string>
     <string name="contact_editor_add_photo">Add photo</string>
     <string name="contact_editor_change_photo">Change photo</string>

@@ -2,6 +2,7 @@ package com.chooloo.www.chooloolib.ui.common
 
 import android.content.Context
 import android.telephony.PhoneNumberFormattingTextWatcher
+import android.telephony.PhoneNumberUtils
 import android.telephony.TelephonyManager
 import android.text.SpannableStringBuilder
 import androidx.compose.runtime.Composable
@@ -27,6 +28,24 @@ fun formatPhoneNumber(number: String, countryIso: String): String {
         text.toString()
     }.getOrNull()?.takeIf { sameDialChars(it, number) } ?: number
 }
+
+/** No phone number anywhere has more than 15 digits (ITU E.164). */
+const val MAX_PHONE_DIGITS = 15
+
+/** Drops digits past [MAX_PHONE_DIGITS], keeping everything else as typed. */
+fun capPhoneDigits(text: String): String {
+    var digits = 0
+    return text.filter { !it.isDigit() || ++digits <= MAX_PHONE_DIGITS }
+}
+
+/**
+ * Whether [number] is a complete, valid number for [countryIso] or in international form.
+ * Service codes (* and #) count as complete. Used only for a gentle hint, never to block.
+ */
+fun looksLikeCompleteNumber(number: String, countryIso: String): Boolean =
+    number.any { it in "*#" } ||
+        runCatching { PhoneNumberUtils.formatNumberToE164(number, countryIso) != null }
+            .getOrDefault(true)
 
 private fun dialChars(text: String) = text.filter { it.isDigit() || it in "+*#" }
 
@@ -76,6 +95,12 @@ fun phoneCountryIso(context: Context): String {
 
 fun formatPhoneNumber(context: Context, number: String): String =
     formatPhoneNumber(number, phoneCountryIso(context))
+
+@Composable
+fun rememberPhoneCountryIso(): String {
+    val context = LocalContext.current
+    return remember(context) { phoneCountryIso(context) }
+}
 
 @Composable
 fun rememberPhoneFormatter(): (String) -> String {

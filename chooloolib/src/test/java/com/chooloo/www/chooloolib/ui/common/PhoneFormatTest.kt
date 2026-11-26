@@ -37,4 +37,12 @@ class PhoneFormatTest {
         val broken = PhoneVisualTransformation { "123" }
         assertEquals("0956", broken.filter(AnnotatedString("0956")).text.text)
     }
+
+    @Test
+    fun `input stops at 15 digits, the longest any phone number can be`() {
+        assertEquals("+639569212428", capPhoneDigits("+639569212428"))
+        assertEquals("123456789012345", capPhoneDigits("1234567890123456789"))
+        assertEquals("+12 345 678 901 234 5", capPhoneDigits("+12 345 678 901 234 567"))
+        assertEquals("*#*#4636#*#*", capPhoneDigits("*#*#4636#*#*"))
+    }
 }
