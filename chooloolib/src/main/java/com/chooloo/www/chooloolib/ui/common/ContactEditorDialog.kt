@@ -73,6 +73,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -515,6 +516,16 @@ private fun ContactField(
         )
     }
     val requester = remember { FocusRequester() }
+    val formatPhone = rememberPhoneFormatter()
+    val transformation = remember(kind, formatPhone) {
+        if (kind ==
+            ContactFieldKind.PHONE
+        ) {
+            PhoneVisualTransformation(formatPhone)
+        } else {
+            VisualTransformation.None
+        }
+    }
     LaunchedEffect(focus) {
         if (focus) {
             requester.requestFocus()
@@ -534,6 +545,7 @@ private fun ContactField(
             shape = MaterialTheme.shapes.medium,
             keyboardOptions = keyboardOptions,
             keyboardActions = KeyboardActions(onDone = { onDone() }),
+            visualTransformation = transformation,
         )
         // Keeps the last message while the exit animation runs.
         var shown by remember { mutableStateOf(error) }
