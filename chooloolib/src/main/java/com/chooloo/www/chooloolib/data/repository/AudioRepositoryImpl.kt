@@ -31,7 +31,8 @@ class AudioRepositoryImpl @Inject constructor(
     }
 
     override suspend fun vibrate() {
-        vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+        // TICK is too faint to feel on some motors (e.g. OPPO); CLICK is the standard key press.
+        vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
     }
 
     private companion object {
