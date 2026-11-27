@@ -1,6 +1,7 @@
 package com.chooloo.www.chooloolib.ui.components.list
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -8,6 +9,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -60,8 +62,16 @@ fun <ItemType> ItemList(
                     { _, item -> it(item) }
                 },
             ) { index, listItem ->
-                headersByIndex[index]?.let { HeaderListItem(header = it) }
-                item(listItem)
+                Column(Modifier.animateItem()) {
+                    headersByIndex[index]?.let { HeaderListItem(header = it) }
+                    val isFirst = index == 0 || headersByIndex.containsKey(index)
+                    val isLast = index == items.lastIndex || headersByIndex.containsKey(index + 1)
+                    CompositionLocalProvider(
+                        LocalListItemPosition provides ListItemPosition.of(isFirst, isLast),
+                    ) {
+                        item(listItem)
+                    }
+                }
             }
         }
     }

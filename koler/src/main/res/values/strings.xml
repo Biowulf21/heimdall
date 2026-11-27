@@ -7,4 +7,5 @@
     <string name="incoming_decline">Decline</string>
     <string name="incoming_answer">Answer</string>
     <string name="launcher_name">Phone</string>
+    <string name="app_name_switch_in_call">Finish the call before changing the app name</string>
 </resources>

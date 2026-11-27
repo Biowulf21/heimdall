@@ -14,17 +14,25 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.chooloo.www.chooloolib.domain.enum.DesignStyle
 import com.chooloo.www.chooloolib.domain.enum.ThemeMode
+
+val LocalDesignStyle = staticCompositionLocalOf { DesignStyle.CLASSIC }
 
 @Composable
 fun ChoolooTheme(
     themeMode: ThemeMode = ThemeMode.SYSTEM,
     accentRgb: Int? = null,
+    designStyle: DesignStyle = DesignStyle.CLASSIC,
+    // false lets a screen own its insets, e.g. so a drawer can reach the screen edge.
+    padded: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val isDark = when (themeMode) {
@@ -55,19 +63,26 @@ fun ChoolooTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = if (accentRgb == null) ChoolooTypography else HeimdallTypography,
-        shapes = if (accentRgb == null) ChoolooShapes else HeimdallShapes,
-    ) {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Box(
-                modifier = Modifier
-                    .safeDrawingPadding()
-                    .padding(start = Spacing.Page, end = Spacing.Page, top = Spacing.Medium),
+    CompositionLocalProvider(LocalDesignStyle provides designStyle) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = if (accentRgb == null) ChoolooTypography else HeimdallTypography,
+            shapes = if (accentRgb == null) ChoolooShapes else HeimdallShapes,
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background,
             ) {
-                content()
+                Box(
+                    modifier = if (padded) Modifier.screenPadding() else Modifier,
+                ) {
+                    content()
+                }
             }
         }
     }
 }
+
+/** The safe-area and page margins every screen sits inside. */
+fun Modifier.screenPadding(): Modifier = safeDrawingPadding()
+    .padding(start = Spacing.Page, end = Spacing.Page, top = Spacing.Medium)

@@ -1,5 +1,6 @@
 package com.chooloo.www.chooloolib.testing
 
+import com.chooloo.www.chooloolib.domain.enum.DesignStyle
 import com.chooloo.www.chooloolib.domain.enum.Page
 import com.chooloo.www.chooloolib.domain.enum.ThemeMode
 import com.chooloo.www.chooloolib.domain.model.Settings
@@ -17,6 +18,10 @@ class FakePreferenceRepository(initial: Settings = Settings()) : PreferenceRepos
 
     override suspend fun setThemeMode(themeMode: ThemeMode) = state.update {
         it.copy(themeMode = themeMode)
+    }
+
+    override suspend fun setDesignStyle(designStyle: DesignStyle) = state.update {
+        it.copy(designStyle = designStyle)
     }
 
     override suspend fun setLeftHanded(enabled: Boolean) = state.update {

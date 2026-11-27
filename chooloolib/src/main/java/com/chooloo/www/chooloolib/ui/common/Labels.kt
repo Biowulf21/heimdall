@@ -2,11 +2,18 @@ package com.chooloo.www.chooloolib.ui.common
 
 import androidx.annotation.StringRes
 import com.chooloo.www.chooloolib.R
+import com.chooloo.www.chooloolib.domain.enum.DesignStyle
 import com.chooloo.www.chooloolib.domain.enum.Page
 import com.chooloo.www.chooloolib.domain.enum.RecentPresentation
 import com.chooloo.www.chooloolib.domain.enum.ThemeMode
 
 object Labels {
+    @StringRes
+    fun titleRes(designStyle: DesignStyle): Int = when (designStyle) {
+        DesignStyle.EXPRESSIVE -> R.string.design_style_expressive
+        DesignStyle.CLASSIC -> R.string.design_style_classic
+    }
+
     @StringRes
     fun titleRes(themeMode: ThemeMode): Int = when (themeMode) {
         ThemeMode.SYSTEM -> R.string.theme_mode_system

@@ -27,13 +27,14 @@ internal val HeimdallShapes = Shapes(
 
 internal fun heimdallColors(rgb: Int, dark: Boolean): androidx.compose.material3.ColorScheme {
     val accent = Color(0xFF000000.toInt() or rgb)
-    val background = Color(if (dark) 0xFF171E24 else 0xFFF8FAFC)
-    val surface = Color(if (dark) 0xFF1D252D else 0xFFFFFFFF)
-    val container = Color(if (dark) 0xFF252F39 else 0xFFEAF0F5)
-    val high = Color(if (dark) 0xFF2C3843 else 0xFFDFE8F1)
-    val highest = Color(if (dark) 0xFF34414E else 0xFFD8E3EE)
-    val foreground = Color(if (dark) 0xFFEAF1F8 else 0xFF17212B)
-    val muted = Color(if (dark) 0xFFB7C5D3 else 0xFF495B6C)
+    // Dark ramp matches Gjall: near-black, neutral cool greys rather than a navy tint.
+    val background = Color(if (dark) 0xFF0D0E12 else 0xFFF8FAFC)
+    val surface = Color(if (dark) 0xFF131418 else 0xFFFFFFFF)
+    val container = Color(if (dark) 0xFF18191E else 0xFFEAF0F5)
+    val high = Color(if (dark) 0xFF1C1F26 else 0xFFDFE8F1)
+    val highest = Color(if (dark) 0xFF25272E else 0xFFD8E3EE)
+    val foreground = Color(if (dark) 0xFFF1F1FC else 0xFF17212B)
+    val muted = Color(if (dark) 0xFFB5B5BD else 0xFF495B6C)
     val softAccent = lerp(container, accent, if (dark) 0.20f else 0.12f)
     val primary = readableAccent(accent, highest, foreground)
     val base = if (dark) darkColorScheme() else lightColorScheme()

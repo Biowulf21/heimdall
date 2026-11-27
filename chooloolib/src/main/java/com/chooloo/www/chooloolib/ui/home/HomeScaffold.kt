@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import com.chooloo.www.chooloolib.R
 import com.chooloo.www.chooloolib.ui.components.FloatingBottomBar
 import com.chooloo.www.chooloolib.ui.components.ScreenTopBar
+import com.chooloo.www.chooloolib.ui.components.SettingsAction
 import com.chooloo.www.chooloolib.ui.theme.Sizes
 
 @Composable
@@ -38,9 +39,7 @@ fun HomeScaffold(
             ScreenTopBar(
                 title = title,
                 actions = {
-                    IconButton(onClick = onSettingsOpen) {
-                        Icon(Icons.Rounded.Settings, stringResource(R.string.settings))
-                    }
+                    SettingsAction(onSettingsOpen)
                 },
             )
             content(PaddingValues(bottom = Sizes.FloatingBarInset))

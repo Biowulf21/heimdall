@@ -21,6 +21,7 @@ import com.chooloo.www.chooloolib.ui.components.ScreenTopBar
 fun PreferencesScreen(
     showDialerPreferences: Boolean,
     onPhoneSetup: (() -> Unit)? = null,
+    appName: AppNameChoice? = null,
     viewModel: PreferencesViewModel = hiltViewModel(),
 ) {
     val externalActions = rememberExternalActions()
@@ -46,6 +47,9 @@ fun PreferencesScreen(
         Preferences(
             defaultPage = settings.defaultPage,
             themeMode = settings.themeMode,
+            designStyle = settings.designStyle,
+            onDesignStyle = viewModel::onDesignStyle,
+            appName = appName,
             isGroupRecentsEnabled = settings.isGroupRecentsEnabled,
             isDialpadTonesEnabled = settings.isDialpadTonesEnabled,
             isDialpadVibrateEnabled = settings.isDialpadVibrateEnabled,

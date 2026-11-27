@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.chooloo.www.chooloolib.domain.enum.DesignStyle
 import com.chooloo.www.chooloolib.domain.enum.Page
 import com.chooloo.www.chooloolib.domain.enum.ThemeMode
 import com.chooloo.www.chooloolib.domain.model.Settings
@@ -31,6 +32,8 @@ class PreferenceRepositoryImpl @Inject constructor(private val dataStore: DataSt
                     preferences[CIRCULAR_LETTER_PREVIEW] ?: defaults.circularLetterPreview,
                 phoneSetupCompleted = preferences[SETUP_COMPLETED] ?: defaults.phoneSetupCompleted,
                 accentRgb = preferences[ACCENT_RGB] ?: defaults.accentRgb,
+                designStyle =
+                    enumOf(preferences, DESIGN_STYLE, DESIGN_STYLE_KEYS) ?: defaults.designStyle,
                 isGroupRecentsEnabled =
                     preferences[GROUP_RECENTS] ?: defaults.isGroupRecentsEnabled,
                 isDialpadTonesEnabled =
@@ -45,6 +48,9 @@ class PreferenceRepositoryImpl @Inject constructor(private val dataStore: DataSt
 
     override suspend fun setThemeMode(themeMode: ThemeMode) =
         set(THEME_MODE, THEME_MODE_KEYS.getValue(themeMode))
+
+    override suspend fun setDesignStyle(designStyle: DesignStyle) =
+        set(DESIGN_STYLE, DESIGN_STYLE_KEYS.getValue(designStyle))
 
     override suspend fun setLeftHanded(enabled: Boolean) = set(LEFT_HANDED, enabled)
 
@@ -81,6 +87,7 @@ class PreferenceRepositoryImpl @Inject constructor(private val dataStore: DataSt
         val ACCENT_RGB = intPreferencesKey("accent_rgb")
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val DEFAULT_PAGE = stringPreferencesKey("default_page")
+        val DESIGN_STYLE = stringPreferencesKey("design_style")
         val GROUP_RECENTS = booleanPreferencesKey("group_recents")
         val DIALPAD_TONES = booleanPreferencesKey("dialpad_tones")
         val DIALPAD_VIBRATE = booleanPreferencesKey("dialpad_vibrate")
@@ -89,6 +96,10 @@ class PreferenceRepositoryImpl @Inject constructor(private val dataStore: DataSt
             Page.DIALER to "dialer",
             Page.CONTACTS to "contacts",
             Page.RECENTS to "recents",
+        )
+        val DESIGN_STYLE_KEYS = mapOf(
+            DesignStyle.EXPRESSIVE to "expressive",
+            DesignStyle.CLASSIC to "classic",
         )
         val THEME_MODE_KEYS = mapOf(
             ThemeMode.SYSTEM to "system",

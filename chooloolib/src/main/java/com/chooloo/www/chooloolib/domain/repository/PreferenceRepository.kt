@@ -1,5 +1,6 @@
 package com.chooloo.www.chooloolib.domain.repository
 
+import com.chooloo.www.chooloolib.domain.enum.DesignStyle
 import com.chooloo.www.chooloolib.domain.enum.Page
 import com.chooloo.www.chooloolib.domain.enum.ThemeMode
 import com.chooloo.www.chooloolib.domain.model.Settings
@@ -10,6 +11,7 @@ interface PreferenceRepository {
 
     suspend fun setDefaultPage(page: Page)
     suspend fun setThemeMode(themeMode: ThemeMode)
+    suspend fun setDesignStyle(designStyle: DesignStyle)
     suspend fun setLeftHanded(enabled: Boolean)
     suspend fun setCircularLetterPreview(enabled: Boolean)
     suspend fun completePhoneSetup()

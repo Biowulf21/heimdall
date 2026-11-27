@@ -1,11 +1,11 @@
 package com.chooloo.www.koler.ui.main
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DeleteOutline
-import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -13,9 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,11 +31,10 @@ import com.chooloo.www.chooloolib.ui.caller.CallerTarget
 import com.chooloo.www.chooloolib.ui.common.rememberExternalActions
 import com.chooloo.www.chooloolib.ui.components.BottomSheet
 import com.chooloo.www.chooloolib.ui.components.ConfirmDialog
-import com.chooloo.www.chooloolib.ui.components.FloatingBubble
-import com.chooloo.www.chooloolib.ui.components.Reveal
 import com.chooloo.www.chooloolib.ui.contacts.ContactsScreen
 import com.chooloo.www.chooloolib.ui.contacts.ContactsViewModel
 import com.chooloo.www.chooloolib.ui.dialpad.DialpadScreen
+import com.chooloo.www.chooloolib.ui.preferences.AppNameChoice
 import com.chooloo.www.chooloolib.ui.preferences.PreferencesScreen
 import com.chooloo.www.chooloolib.ui.recents.RecentsScreen
 import com.chooloo.www.koler.ui.call.CallActivity
@@ -70,10 +69,10 @@ fun MainScreen(viewModel: MainViewModel) {
     }
 
     DialerHomeScaffold(
-        title = if (selecting) {
+        selectionTitle = if (selecting) {
             stringResource(R.string.contacts_selected_count, selection.ids.size)
         } else {
-            stringResource(if (tab == Tab.RECENTS) R.string.recents else R.string.contacts)
+            null
         },
         selectionActions = if (selecting) {
             {
@@ -103,20 +102,27 @@ fun MainScreen(viewModel: MainViewModel) {
         onSearchOpen = viewModel.search::open,
         onSearchTextChange = viewModel.search::changeText,
         onSearchClose = viewModel.search::close,
-        onSettingsOpen = viewModel::onSettingsOpen,
+        drawerContent = { closeDrawer ->
+            HomeDrawer(
+                selectedTab = tab,
+                onTabSelected = {
+                    closeDrawer()
+                    if (!selection.deleting && it != tab) {
+                        contactsViewModel.clearSelection()
+                        viewModel.onTabSelected(it)
+                    }
+                },
+                onAddContact = {
+                    closeDrawer()
+                    externalActions.createContact()
+                },
+                onSettings = {
+                    closeDrawer()
+                    viewModel.onSettingsOpen()
+                },
+            )
+        },
         bottomBarContent = {
-            Reveal(
-                visible = tab == Tab.CONTACTS && !selecting,
-                modifier = Modifier.align(
-                    if (leftHanded) AbsoluteAlignment.CenterLeft else AbsoluteAlignment.CenterRight,
-                ),
-            ) {
-                FloatingBubble(
-                    icon = Icons.Rounded.PersonAdd,
-                    contentDescription = stringResource(R.string.cd_add_contact),
-                    onClick = { externalActions.createContact() },
-                )
-            }
             MainNavigationBar(
                 selectedTab = tab,
                 onTabSelected = {
@@ -194,10 +200,31 @@ fun MainScreen(viewModel: MainViewModel) {
         skipPartiallyExpanded = true,
         onDismiss = viewModel::onSettingsClose,
     ) {
-        PreferencesScreen(showDialerPreferences = true, onPhoneSetup = {
-            viewModel.onSettingsClose()
-            setupOpen = true
-        })
+        val appNameContext = LocalContext.current
+        var isBrandName by remember { mutableStateOf(LauncherName.isBrand(appNameContext)) }
+        val callBlocksSwitch =
+            stringResource(com.chooloo.www.koler.R.string.app_name_switch_in_call)
+        PreferencesScreen(
+            showDialerPreferences = true,
+            onPhoneSetup = {
+                viewModel.onSettingsClose()
+                setupOpen = true
+            },
+            appName = AppNameChoice(
+                defaultName = stringResource(com.chooloo.www.koler.R.string.launcher_name),
+                brandName = stringResource(com.chooloo.www.koler.R.string.app_name),
+                isBrand = isBrandName,
+                onSelect = { brand ->
+                    // Toggling a component during a call risks the system restarting the dialer.
+                    if (ongoingCall != null) {
+                        Toast.makeText(appNameContext, callBlocksSwitch, Toast.LENGTH_SHORT).show()
+                    } else if (brand != isBrandName) {
+                        LauncherName.apply(appNameContext, brand)
+                        isBrandName = brand
+                    }
+                },
+            ),
+        )
     }
 
     BottomSheet(

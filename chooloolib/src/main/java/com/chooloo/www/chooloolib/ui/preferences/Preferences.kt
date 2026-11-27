@@ -3,6 +3,7 @@ package com.chooloo.www.chooloolib.ui.preferences
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ViewList
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Circle
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.SwapHoriz
+import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.Vibration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.chooloo.www.chooloolib.R
+import com.chooloo.www.chooloolib.domain.enum.DesignStyle
 import com.chooloo.www.chooloolib.domain.enum.Page
 import com.chooloo.www.chooloolib.domain.enum.ThemeMode
 import com.chooloo.www.chooloolib.ui.common.Labels
@@ -44,6 +47,17 @@ private enum class PreferenceItem(
     val isDialerOnly: Boolean = false,
 ) {
     THEME_MODE(PreferenceSection.APPEARANCE, Icons.Rounded.Palette, R.string.pref_title_theme_mode),
+    DESIGN_STYLE(
+        PreferenceSection.APPEARANCE,
+        Icons.Rounded.AutoAwesome,
+        R.string.pref_title_design_style,
+    ),
+    APP_NAME(
+        PreferenceSection.APPEARANCE,
+        Icons.Rounded.TextFields,
+        R.string.pref_title_app_name,
+        R.string.pref_app_name_description,
+    ),
     THEME_COLOR(
         PreferenceSection.APPEARANCE,
         Icons.Rounded.Palette,
@@ -112,10 +126,21 @@ private enum class PreferenceItem(
     DONATE(PreferenceSection.ABOUT, Icons.Rounded.Favorite, R.string.pref_title_donate),
 }
 
+/** Launcher-name choice; only the app that owns the launcher aliases passes one. */
+class AppNameChoice(
+    val defaultName: String,
+    val brandName: String,
+    val isBrand: Boolean,
+    val onSelect: (isBrand: Boolean) -> Unit,
+)
+
 @Composable
 fun Preferences(
     defaultPage: Page,
     themeMode: ThemeMode,
+    designStyle: DesignStyle,
+    onDesignStyle: (DesignStyle) -> Unit,
+    appName: AppNameChoice?,
     isGroupRecentsEnabled: Boolean,
     isDialpadTonesEnabled: Boolean,
     isDialpadVibrateEnabled: Boolean,
@@ -146,7 +171,8 @@ fun Preferences(
 
     val preferences = PreferenceItem.entries.filter {
         (showDialerPreferences || !it.isDialerOnly) &&
-            (it != PreferenceItem.PHONE_SETUP || onPhoneSetup != null)
+            (it != PreferenceItem.PHONE_SETUP || onPhoneSetup != null) &&
+            (it != PreferenceItem.APP_NAME || appName != null)
     }
     val sectionTitles = PreferenceSection.entries.associateWith { stringResource(it.titleRes) }
 
@@ -168,6 +194,27 @@ fun Preferences(
                     label = { stringResource(Labels.titleRes(it)) },
                     onValueSelected = onThemeMode,
                 )
+
+                PreferenceItem.DESIGN_STYLE -> ChoicePreferenceListItem(
+                    icon = icon,
+                    title = title,
+                    values = DesignStyle.entries,
+                    selectedValue = designStyle,
+                    label = { stringResource(Labels.titleRes(it)) },
+                    onValueSelected = onDesignStyle,
+                )
+
+                PreferenceItem.APP_NAME -> appName?.let { choice ->
+                    ChoicePreferenceListItem(
+                        icon = icon,
+                        title = title,
+                        values = listOf(false, true),
+                        selectedValue = choice.isBrand,
+                        label = { if (it) choice.brandName else choice.defaultName },
+                        onValueSelected = choice.onSelect,
+                        description = description,
+                    )
+                }
 
                 PreferenceItem.THEME_COLOR -> ActionPreferenceListItem(
                     icon,

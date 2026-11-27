@@ -23,6 +23,7 @@ fun <T> ChoicePreferenceListItem(
     selectedValue: T,
     label: @Composable (T) -> String,
     onValueSelected: (T) -> Unit,
+    description: String? = null,
 ) {
     var isChoosing by remember { mutableStateOf(false) }
 
@@ -39,6 +40,7 @@ fun <T> ChoicePreferenceListItem(
             title = { Text(title) },
             text = {
                 Column {
+                    description?.let { Text(it) }
                     values.forEach { value ->
                         RadioListItem(title = label(value), isSelected = value == selectedValue) {
                             onValueSelected(value)

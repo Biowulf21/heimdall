@@ -1,5 +1,6 @@
 package com.chooloo.www.chooloolib.domain.model
 
+import com.chooloo.www.chooloolib.domain.enum.DesignStyle
 import com.chooloo.www.chooloolib.domain.enum.Page
 import com.chooloo.www.chooloolib.domain.enum.ThemeMode
 
@@ -13,4 +14,5 @@ data class Settings(
     val circularLetterPreview: Boolean = false,
     val phoneSetupCompleted: Boolean = false,
     val accentRgb: Int = 0x42A5F5,
+    val designStyle: DesignStyle = DesignStyle.EXPRESSIVE,
 )

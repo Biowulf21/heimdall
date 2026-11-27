@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.hilt.android)
     api(libs.coroutines.android)
     implementation(libs.datastore.preferences)
+    implementation(libs.graphics.shapes)
 
     debugApi(libs.compose.ui.tooling)
 
