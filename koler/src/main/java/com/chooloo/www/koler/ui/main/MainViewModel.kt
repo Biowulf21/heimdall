@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chooloo.www.chooloolib.domain.enum.Page
+import com.chooloo.www.chooloolib.domain.enum.RecentFilter
 import com.chooloo.www.chooloolib.domain.model.PhoneLookup
 import com.chooloo.www.chooloolib.domain.repository.PhoneRepository
 import com.chooloo.www.chooloolib.domain.repository.PreferenceRepository
@@ -50,13 +51,16 @@ class MainViewModel @Inject constructor(
         val isSearching: Boolean = false,
         val searchText: String = "",
         val selectedCaller: CallerTarget? = null,
-        val isSettingsOpen: Boolean = false,
+        val recentFilter: RecentFilter = RecentFilter.ALL,
+        val favoritesOnly: Boolean = false,
     )
 
+    // In memory only: list filters reset when the process or the user leaves.
     private data class TransientState(
         val dialNumber: String? = null,
         val selectedCaller: CallerTarget? = null,
-        val isSettingsOpen: Boolean = false,
+        val recentFilter: RecentFilter = RecentFilter.ALL,
+        val favoritesOnly: Boolean = false,
     )
 
     private val tab = savedStateHandle.getStateFlow<Tab?>(KEY_TAB, null)
@@ -90,7 +94,8 @@ class MainViewModel @Inject constructor(
             isSearching,
             searchText,
             transient.selectedCaller,
-            transient.isSettingsOpen,
+            transient.recentFilter,
+            transient.favoritesOnly,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UiState())
 
@@ -130,7 +135,7 @@ class MainViewModel @Inject constructor(
         onTabSelected(Tab.RECENTS)
         onDialpadClose()
         search.close()
-        transientState.value = TransientState()
+        transientState.value = TransientState(recentFilter = RecentFilter.MISSED)
         viewModelScope.launch(NonCancellable) {
             runCatching {
                 clearMissedCalls()
@@ -159,12 +164,18 @@ class MainViewModel @Inject constructor(
         transientState.update { it.copy(selectedCaller = null) }
     }
 
-    fun onSettingsOpen() {
-        transientState.update { it.copy(isSettingsOpen = true) }
+    fun onRecentFilter(filter: RecentFilter) {
+        onTabSelected(Tab.RECENTS)
+        transientState.update { it.copy(recentFilter = filter) }
     }
 
-    fun onSettingsClose() {
-        transientState.update { it.copy(isSettingsOpen = false) }
+    fun onFavoritesOnly(favoritesOnly: Boolean) {
+        if (favoritesOnly) onTabSelected(Tab.CONTACTS)
+        transientState.update { it.copy(favoritesOnly = favoritesOnly) }
+    }
+
+    fun onUserLeft() {
+        transientState.update { it.copy(recentFilter = RecentFilter.ALL, favoritesOnly = false) }
     }
 
     private fun closeDialSheetsWhenCallStarts() {

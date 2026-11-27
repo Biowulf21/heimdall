@@ -2,6 +2,7 @@ package com.chooloo.www.koler.ui.main
 
 import androidx.lifecycle.SavedStateHandle
 import com.chooloo.www.chooloolib.domain.enum.Page
+import com.chooloo.www.chooloolib.domain.enum.RecentFilter
 import com.chooloo.www.chooloolib.domain.model.PhoneLookup
 import com.chooloo.www.chooloolib.domain.model.Settings
 import com.chooloo.www.chooloolib.testing.FakePhoneRepository
@@ -129,7 +130,6 @@ class MainViewModelTest {
     fun `opening missed calls shows recents with nothing covering it`() = runSubscribed {
         viewModel.onTabSelected(MainViewModel.Tab.CONTACTS)
         viewModel.onDialpadOpen()
-        viewModel.onSettingsOpen()
         viewModel.search.open()
         viewModel.search.changeText("dana")
 
@@ -138,9 +138,23 @@ class MainViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(MainViewModel.Tab.RECENTS, state.tab)
         assertFalse(state.isDialpadOpen)
-        assertFalse(state.isSettingsOpen)
+        assertEquals(RecentFilter.MISSED, state.recentFilter)
         assertFalse(state.isSearching)
         assertEquals("", state.searchText)
+    }
+
+    @Test
+    fun `list filters switch tabs and reset when the user leaves`() = runSubscribed {
+        viewModel.onRecentFilter(RecentFilter.OUTGOING)
+        assertEquals(MainViewModel.Tab.RECENTS, viewModel.uiState.value.tab)
+        viewModel.onFavoritesOnly(true)
+        assertEquals(MainViewModel.Tab.CONTACTS, viewModel.uiState.value.tab)
+
+        viewModel.onUserLeft()
+
+        val state = viewModel.uiState.value
+        assertEquals(RecentFilter.ALL, state.recentFilter)
+        assertFalse(state.favoritesOnly)
     }
 
     @Test

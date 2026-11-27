@@ -20,6 +20,12 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    // Home or recents, not our own startActivity calls, so filters survive opening a contact.
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        mainViewModel.onUserLeft()
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleIntent(intent)

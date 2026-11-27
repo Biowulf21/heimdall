@@ -82,6 +82,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.settings.SettingsActivity"
+            android:exported="false" />
+
+        <activity
             android:name="com.chooloo.www.chooloolib.ui.common.ContactEditorActivity"
             android:excludeFromRecents="true"
             android:exported="true"

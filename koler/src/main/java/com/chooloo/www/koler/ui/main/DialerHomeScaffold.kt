@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -54,8 +55,8 @@ import kotlinx.coroutines.launch
 
 /**
  * Home layout: a menu button and a full-width search pill on top, the list below, the floating
- * bar at the bottom. Settings and navigation live in the drawer the menu button opens, so the top
- * row carries no competing buttons. While contacts are selected the pill shows the count and the
+ * bar at the bottom. Filters, settings and the rest live in the drawer the menu button opens, so
+ * the top row carries no competing buttons. While contacts are selected the pill shows the count and the
  * selection actions instead of the field.
  */
 @Composable
@@ -66,7 +67,7 @@ internal fun DialerHomeScaffold(
     onSearchOpen: () -> Unit,
     onSearchTextChange: (String) -> Unit,
     onSearchClose: () -> Unit,
-    drawerContent: @Composable ColumnScope.(closeDrawer: () -> Unit) -> Unit,
+    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit,
     selectionTitle: String? = null,
     selectionActions: (@Composable RowScope.() -> Unit)? = null,
     bottomBarContent: @Composable BoxScope.() -> Unit,
@@ -92,10 +93,9 @@ internal fun DialerHomeScaffold(
         drawerContent = {
             ModalDrawerSheet(
                 drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                drawerShape = RoundedCornerShape(topEnd = 28.dp, bottomEnd = 28.dp),
             ) {
-                Column(Modifier.padding(horizontal = Spacing.Page, vertical = Spacing.Medium)) {
-                    drawerContent(closeDrawer)
-                }
+                drawerContent(closeDrawer)
             }
         },
     ) {

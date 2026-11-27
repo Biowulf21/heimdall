@@ -45,6 +45,8 @@ private enum class PreferenceItem(
     @StringRes val titleRes: Int,
     @StringRes val descriptionRes: Int? = null,
     val isDialerOnly: Boolean = false,
+    // The dialer reaches these from its home drawer, so its Settings page leaves them out.
+    val isInDialerDrawer: Boolean = false,
 ) {
     THEME_MODE(PreferenceSection.APPEARANCE, Icons.Rounded.Palette, R.string.pref_title_theme_mode),
     DESIGN_STYLE(
@@ -119,11 +121,22 @@ private enum class PreferenceItem(
         Icons.Rounded.Block,
         R.string.pref_title_manage_blocked,
         isDialerOnly = true,
+        isInDialerDrawer = true,
     ),
     RATE(PreferenceSection.ABOUT, Icons.Rounded.Star, R.string.pref_title_rate),
     EMAIL(PreferenceSection.ABOUT, Icons.Rounded.Email, R.string.pref_title_email),
-    REPORT_BUGS(PreferenceSection.ABOUT, Icons.Rounded.BugReport, R.string.pref_title_report_bugs),
-    DONATE(PreferenceSection.ABOUT, Icons.Rounded.Favorite, R.string.pref_title_donate),
+    REPORT_BUGS(
+        PreferenceSection.ABOUT,
+        Icons.Rounded.BugReport,
+        R.string.pref_title_report_bugs,
+        isInDialerDrawer = true,
+    ),
+    DONATE(
+        PreferenceSection.ABOUT,
+        Icons.Rounded.Favorite,
+        R.string.pref_title_donate,
+        isInDialerDrawer = true,
+    ),
 }
 
 /** Launcher-name choice; only the app that owns the launcher aliases passes one. */
@@ -171,6 +184,7 @@ fun Preferences(
 
     val preferences = PreferenceItem.entries.filter {
         (showDialerPreferences || !it.isDialerOnly) &&
+            !(showDialerPreferences && it.isInDialerDrawer) &&
             (it != PreferenceItem.PHONE_SETUP || onPhoneSetup != null) &&
             (it != PreferenceItem.APP_NAME || appName != null)
     }

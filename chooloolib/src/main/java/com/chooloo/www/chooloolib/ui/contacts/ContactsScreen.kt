@@ -18,6 +18,7 @@ fun ContactsScreen(
     contentPadding: PaddingValues = PaddingValues(),
     filter: String,
     withFavorites: Boolean = true,
+    favoritesOnly: Boolean = false,
     alphabetIndexOnLeft: Boolean? = null,
     circularLetterPreview: Boolean = false,
     selectedIds: Set<Long> = emptySet(),
@@ -37,8 +38,8 @@ fun ContactsScreen(
         ContactsList(
             modifier = modifier,
             contentPadding = contentPadding,
-            items = uiState.items,
-            withFavorites = withFavorites && filter.isEmpty(),
+            items = if (favoritesOnly) uiState.items.filter { it.isFavorite } else uiState.items,
+            withFavorites = withFavorites && filter.isEmpty() && !favoritesOnly,
             alphabetIndexOnLeft = alphabetIndexOnLeft.takeIf { filter.isEmpty() },
             circularLetterPreview = circularLetterPreview,
             selectedIds = selectedIds,

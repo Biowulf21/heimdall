@@ -148,6 +148,17 @@
     <string name="cd_search">Search</string>
     <string name="cd_close_search">Close search</string>
     <string name="cd_open_menu">Open menu</string>
+    <string name="filter_all_calls">All calls</string>
+    <string name="filter_missed">Missed</string>
+    <string name="filter_incoming">Incoming</string>
+    <string name="filter_outgoing">Outgoing</string>
+    <string name="favourites">Favourites</string>
+    <string name="blocked_numbers">Blocked numbers</string>
+    <string name="voicemail">Voicemail</string>
+    <string name="no_voicemail_number">No voicemail number set</string>
+    <string name="phone_setup">Phone setup</string>
+    <string name="help_feedback">Help and feedback</string>
+    <string name="cd_clear_filter">Clear filter</string>
     <string name="cd_dialpad">Dialpad</string>
     <string name="action_message">Message</string>
     <string name="action_edit">Edit</string>

@@ -1,19 +1,27 @@
 package com.chooloo.www.koler.ui.main
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
-import android.widget.Toast
+import android.net.Uri
+import android.os.Bundle
+import android.telecom.PhoneAccount
+import android.telecom.TelecomManager
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
+import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -26,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chooloo.www.chooloolib.R
+import com.chooloo.www.chooloolib.domain.enum.RecentFilter
 import com.chooloo.www.chooloolib.ui.caller.CallerScreen
 import com.chooloo.www.chooloolib.ui.caller.CallerTarget
 import com.chooloo.www.chooloolib.ui.common.rememberExternalActions
@@ -34,12 +43,12 @@ import com.chooloo.www.chooloolib.ui.components.ConfirmDialog
 import com.chooloo.www.chooloolib.ui.contacts.ContactsScreen
 import com.chooloo.www.chooloolib.ui.contacts.ContactsViewModel
 import com.chooloo.www.chooloolib.ui.dialpad.DialpadScreen
-import com.chooloo.www.chooloolib.ui.preferences.AppNameChoice
-import com.chooloo.www.chooloolib.ui.preferences.PreferencesScreen
 import com.chooloo.www.chooloolib.ui.recents.RecentsScreen
+import com.chooloo.www.chooloolib.ui.theme.Spacing
 import com.chooloo.www.koler.ui.call.CallActivity
 import com.chooloo.www.koler.ui.contact.ContactProfileActivity
 import com.chooloo.www.koler.ui.main.MainViewModel.Tab
+import com.chooloo.www.koler.ui.settings.SettingsActivity
 
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
@@ -103,23 +112,33 @@ fun MainScreen(viewModel: MainViewModel) {
         onSearchTextChange = viewModel.search::changeText,
         onSearchClose = viewModel.search::close,
         drawerContent = { closeDrawer ->
+            val bugReportUrl = stringResource(R.string.app_bug_reporting_url)
+            val donationUrl = stringResource(R.string.donation_link)
+            fun run(action: () -> Unit): () -> Unit = {
+                closeDrawer()
+                action()
+            }
             HomeDrawer(
-                selectedTab = tab,
-                onTabSelected = {
+                recentFilter = uiState.recentFilter.takeIf { tab == Tab.RECENTS },
+                favoritesOnly = uiState.favoritesOnly && tab == Tab.CONTACTS,
+                onRecentFilter = {
                     closeDrawer()
-                    if (!selection.deleting && it != tab) {
+                    if (!selection.deleting) {
                         contactsViewModel.clearSelection()
-                        viewModel.onTabSelected(it)
+                        viewModel.onRecentFilter(it)
                     }
                 },
-                onAddContact = {
-                    closeDrawer()
-                    externalActions.createContact()
+                onFavorites = run {
+                    if (!selection.deleting) viewModel.onFavoritesOnly(true)
                 },
-                onSettings = {
-                    closeDrawer()
-                    viewModel.onSettingsOpen()
+                onBlockedNumbers = run(externalActions::openManageBlockedNumbers),
+                onVoicemail = run { callGate(null) { callVoicemail(context) } },
+                onSettings = run {
+                    context.startActivity(Intent(context, SettingsActivity::class.java))
                 },
+                onPhoneSetup = run { setupOpen = true },
+                onHelp = run { externalActions.openUrl(bugReportUrl) },
+                onDonate = run { externalActions.openUrl(donationUrl) },
             )
         },
         bottomBarContent = {
@@ -131,7 +150,10 @@ fun MainScreen(viewModel: MainViewModel) {
                         viewModel.onTabSelected(it)
                     }
                 },
+                isPrimaryVisible = !selecting,
+                leftHanded = leftHanded,
                 onDialpadClick = viewModel::onDialpadOpen,
+                onAddContactClick = { externalActions.createContact() },
                 modifier = Modifier.align(Alignment.Center),
             )
         },
@@ -140,6 +162,32 @@ fun MainScreen(viewModel: MainViewModel) {
             OngoingCallBanner(
                 ongoingCall = it,
                 onClick = { context.startActivity(Intent(context, CallActivity::class.java)) },
+            )
+        }
+        val activeFilter = when {
+            tab == Tab.RECENTS && uiState.recentFilter != RecentFilter.ALL ->
+                stringResource(uiState.recentFilter.labelRes)
+
+            tab == Tab.CONTACTS && uiState.favoritesOnly -> stringResource(R.string.favourites)
+
+            else -> null
+        }
+        activeFilter?.let {
+            InputChip(
+                selected = true,
+                onClick = {
+                    viewModel.onRecentFilter(RecentFilter.ALL)
+                    viewModel.onFavoritesOnly(false)
+                },
+                label = { Text(it) },
+                trailingIcon = {
+                    Icon(
+                        Icons.Rounded.Close,
+                        stringResource(R.string.cd_clear_filter),
+                        Modifier.size(InputChipDefaults.IconSize),
+                    )
+                },
+                modifier = Modifier.padding(start = Spacing.Small),
             )
         }
         if (selecting && selection.deleteFailed) {
@@ -151,6 +199,7 @@ fun MainScreen(viewModel: MainViewModel) {
         when (tab) {
             Tab.RECENTS -> RecentsScreen(
                 filter = uiState.searchText,
+                typeFilter = uiState.recentFilter,
                 contentPadding = listPadding,
                 onItemClick = {
                     viewModel.onCallerSelected(CallerTarget.RecentTarget(it.latest.id))
@@ -163,6 +212,7 @@ fun MainScreen(viewModel: MainViewModel) {
                 selectedIds = selection.ids,
                 alphabetIndexOnLeft = leftHanded.takeUnless { uiState.isSearching },
                 circularLetterPreview = phoneSettings?.circularLetterPreview == true,
+                favoritesOnly = uiState.favoritesOnly,
                 filter = uiState.searchText,
                 contentPadding = listPadding,
                 onItemClick = {
@@ -196,38 +246,6 @@ fun MainScreen(viewModel: MainViewModel) {
     }
 
     BottomSheet(
-        visible = uiState.isSettingsOpen,
-        skipPartiallyExpanded = true,
-        onDismiss = viewModel::onSettingsClose,
-    ) {
-        val appNameContext = LocalContext.current
-        var isBrandName by remember { mutableStateOf(LauncherName.isBrand(appNameContext)) }
-        val callBlocksSwitch =
-            stringResource(com.chooloo.www.koler.R.string.app_name_switch_in_call)
-        PreferencesScreen(
-            showDialerPreferences = true,
-            onPhoneSetup = {
-                viewModel.onSettingsClose()
-                setupOpen = true
-            },
-            appName = AppNameChoice(
-                defaultName = stringResource(com.chooloo.www.koler.R.string.launcher_name),
-                brandName = stringResource(com.chooloo.www.koler.R.string.app_name),
-                isBrand = isBrandName,
-                onSelect = { brand ->
-                    // Toggling a component during a call risks the system restarting the dialer.
-                    if (ongoingCall != null) {
-                        Toast.makeText(appNameContext, callBlocksSwitch, Toast.LENGTH_SHORT).show()
-                    } else if (brand != isBrandName) {
-                        LauncherName.apply(appNameContext, brand)
-                        isBrandName = brand
-                    }
-                },
-            ),
-        )
-    }
-
-    BottomSheet(
         visible = uiState.isDialpadOpen,
         skipPartiallyExpanded = true,
         onDismiss = viewModel::onDialpadClose,
@@ -255,4 +273,19 @@ fun MainScreen(viewModel: MainViewModel) {
             CallerScreen(target = it, onDismiss = viewModel::onCallerDismiss, callGate = callGate)
         }
     }
+}
+
+private val RecentFilter.labelRes
+    get() = when (this) {
+        RecentFilter.ALL -> R.string.filter_all_calls
+        RecentFilter.MISSED -> R.string.filter_missed
+        RecentFilter.INCOMING -> R.string.filter_incoming
+        RecentFilter.OUTGOING -> R.string.filter_outgoing
+    }
+
+/** Telecom shows its own prompt when the SIM has no voicemail number set. */
+@SuppressLint("MissingPermission") // The call gate only runs this once CALL_PHONE is granted.
+private fun callVoicemail(context: Context) {
+    context.getSystemService(TelecomManager::class.java)
+        ?.placeCall(Uri.fromParts(PhoneAccount.SCHEME_VOICEMAIL, "", null), Bundle())
 }

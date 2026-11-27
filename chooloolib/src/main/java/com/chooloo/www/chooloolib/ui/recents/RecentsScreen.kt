@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chooloo.www.chooloolib.R
+import com.chooloo.www.chooloolib.domain.enum.RecentFilter
 import com.chooloo.www.chooloolib.domain.model.RecentGroup
 import com.chooloo.www.chooloolib.ui.components.Permissioned
 
@@ -17,6 +19,7 @@ fun RecentsScreen(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     filter: String,
+    typeFilter: RecentFilter = RecentFilter.ALL,
     onItemClick: (RecentGroup) -> Unit,
     onItemLongClick: ((RecentGroup) -> Unit)? = null,
     viewModel: RecentsViewModel = hiltViewModel(),
@@ -34,7 +37,9 @@ fun RecentsScreen(
         RecentsList(
             modifier = modifier,
             contentPadding = contentPadding,
-            items = uiState.items,
+            items = remember(uiState.items, typeFilter) {
+                uiState.items.filter { typeFilter.matches(it.type) }
+            },
             groupSimilar = isGroupRecentsEnabled && filter.isEmpty(),
             onItemClick = onItemClick,
             onItemLongClick = onItemLongClick,
