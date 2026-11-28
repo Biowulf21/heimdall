@@ -38,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.chooloo.www.chooloolib.R
 import com.chooloo.www.chooloolib.domain.enum.RecentFilter
@@ -144,11 +145,13 @@ internal fun HomeDrawer(
     ) {
         Text(
             text = stringResource(com.chooloo.www.koler.R.string.app_name),
-            style = MaterialTheme.typography.displaySmall,
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            // Starts on the badge column, so the title and the icons share one edge
             modifier = Modifier.padding(
-                start = Spacing.Large,
+                start = Spacing.Medium,
                 top = Spacing.ExtraLarge,
-                bottom = Spacing.Small,
+                bottom = Spacing.ExtraSmall,
             ),
         )
         groups.forEach { DrawerGroup(it) }
@@ -169,7 +172,8 @@ private fun DrawerGroup(entries: List<DrawerEntry>) {
 @Composable
 private fun DrawerRow(entry: DrawerEntry, shape: RoundedCornerShape) {
     val colors = MaterialTheme.colorScheme
-    // The selected row is filled, so its badge melts into it like Gjall's.
+    // Shared with Gjall's drawer: 56dp rows, 40dp badges. The selected row is filled, so its
+    // badge melts into it.
     val badgeColor =
         if (entry.isSelected) colors.secondaryContainer else colors.surfaceContainerHighest
     val iconColor = if (entry.isSelected) colors.onSecondaryContainer else colors.onSurfaceVariant
@@ -177,18 +181,18 @@ private fun DrawerRow(entry: DrawerEntry, shape: RoundedCornerShape) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 72.dp)
+            .heightIn(min = 56.dp)
             .clip(shape)
             .background(
                 if (entry.isSelected) colors.secondaryContainer else colors.surfaceContainer,
             )
             .clickable(role = Role.Button, onClick = entry.onClick)
-            .padding(horizontal = Spacing.Medium),
+            .padding(start = Spacing.Medium, end = Spacing.Large),
     ) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(48.dp)
+                .size(40.dp)
                 .background(badgeColor, CircleShape),
         ) {
             Icon(
@@ -202,6 +206,8 @@ private fun DrawerRow(entry: DrawerEntry, shape: RoundedCornerShape) {
             text = entry.label,
             style = MaterialTheme.typography.titleMedium,
             color = if (entry.isSelected) colors.onSecondaryContainer else colors.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
