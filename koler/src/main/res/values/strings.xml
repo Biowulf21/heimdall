@@ -6,6 +6,10 @@
     <string name="incoming_swipe_hint">Swipe left to decline or right to answer</string>
     <string name="incoming_decline">Decline</string>
     <string name="incoming_answer">Answer</string>
+    <string name="call_action_more">More</string>
+    <string name="call_more_title">More</string>
+    <string name="call_more_close">Close more options</string>
+    <string name="call_action_on">On</string>
     <string name="launcher_name">Phone</string>
     <string name="app_name_switch_in_call">Finish the call before changing the app name</string>
 </resources>
